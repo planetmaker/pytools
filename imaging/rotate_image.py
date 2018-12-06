@@ -8,7 +8,8 @@ Created on Thu Dec  6 11:03:16 2018
 
 import cv2
 
-def rotate_image(img):
+def rotate_image(img, angle=90):
     height, width, channels = img.shape
-    M = cv2.getRotationMatrix2D((width/2, height/2), 90, 1)
-    return cv2.warpAffine(img, M, (width,height))
+    M = cv2.getRotationMatrix2D((width/2, height/2), angle, 1)
+    ret = cv2.warpAffine(img, M, (height, width))
+    return ret
