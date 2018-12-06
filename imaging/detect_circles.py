@@ -44,7 +44,3 @@ if __name__ == "__main__":
 
     print("Press any key in the image window to continue")
     cv2.imshow('circles', img)
-
-    k = cv2.waitKey(0)
-    if k == 27:
-        cv2.destroyAllWindows()
