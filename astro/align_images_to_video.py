@@ -21,7 +21,7 @@ from rotate_image import rotate_image
 
 #def align_images_to_video(path, pattern, output="out.mp4"):
 os.chdir(path)
-files = glob.glob(pattern)
+files = sorted(glob.glob(pattern), reverse=True)
 
 img_info = dict()
 for file in files:
@@ -33,17 +33,21 @@ for file in files:
         continue
     thumb = cv2.resize(img, (int(0.2 * height), int(0.2 * width)), interpolation=cv2.INTER_CUBIC)
     height, width, channels = thumb.shape
+
+    # Make sure that they are all in the same rotation state. That curiously is not the case by default.
     rotate = 0
     if height > width:
         thumb = rotate_image(thumb)
         rotate = 90
+        height, width, channels = thumb.shape
+
+    # Detect the circles and find the best.
     circles = detect_circles(thumb)
     if circles is None:
         print("No circle found in {}".format(file))
         continue
     best = {'i':None, 'dist':0, 'x':None, 'y':None, 'r':None}
     for n,circle in enumerate(circles):
-        print(circle)
         dist = min([width-circle[0][0],height-circle[0][1]])
         if dist > best.get('dist'):
             best = {
@@ -65,6 +69,7 @@ for file in files:
 print(img_info)
 # print(files)
 
+# show the last image with circles superimposed
 cv2.circle(
         thumb, # image
         (img_info[file].get('best').get('x'), img_info[file].get('best').get('y')), # point (x,y)
