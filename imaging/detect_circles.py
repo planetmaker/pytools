@@ -16,18 +16,19 @@ def detect_circles(img, relative_radius_percent=20, gradient=10, threshold=40, m
         return None
 
     radius = max([height, width]) / 2
-    if minRadius is not None:
-        radius_min = int(radius * (100-relative_radius_percent)/100)
-    if maxRadius is not None:
-        radius_max = int(radius * (100+relative_radius_percent)/100)
+    if minRadius == None:
+        minRadius = int(radius * (100-relative_radius_percent)/100)
+    if maxRadius == None:
+        maxRadius = int(radius * (100+relative_radius_percent)/100)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, radius,
                   param1=gradient,
                   param2=threshold,
-                  minRadius=radius_min,
-                  maxRadius=radius_max)
+                  minRadius=minRadius,
+                  maxRadius=maxRadius,
+                  )
 
     return circles
 
