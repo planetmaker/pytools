@@ -24,8 +24,15 @@ from rotate_image import rotate_image
 os.chdir(path)
 files = sorted(glob.glob(pattern))
 
+#fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
+#video = cv2.VideoWriter(filename="out.mp4", fourcc, 25, (width, height), True)
+#count = 0
+
+defx = None
+defy = None
+
 img_info = []
-for file in files[350:353]:
+for file in files[0:50]:
     img = cv2.imread(path + file)
     try:
         width, height, channels = img.shape
@@ -45,21 +52,10 @@ for file in files[350:353]:
         rot = thumb
 
     # Detect the circles and find the best.
-    circles = detect_circles(rot)
+    best,circles = detect_circles(rot,similar={'bestx':width, 'besty':height})
     if circles is None:
         print("No circle found in {}".format(file))
         continue
-    best = {'i':None, 'dist':0, 'x':None, 'y':None, 'r':None}
-    for n,circle in enumerate(circles):
-        dist = min([width-circle[0][0],height-circle[0][1]])
-        if dist > best.get('dist'):
-            best = {
-                    'i':n,
-                    'dist':dist,
-                    'x':circle[0][0],
-                    'y':circle[0][1],
-                    'r':circle[0][2],
-                    }
     img_info.append({
             'name':file,
             'width': width,
@@ -69,6 +65,26 @@ for file in files[350:353]:
             'rotate':rotate,
             'best': best,
             })
+
+    # if it is the first image, we define the centere and align everything
+    #     else according to this
+    if defx == None:
+        defx = best.get('x')
+        defy = best.get('y')
+        dx = 0
+        dy = 0
+        print("Setting default x and y values for centre")
+    else:
+        dx = defx - best.get('x')
+        dy = defy - best.get('y')
+
+    moveM = np.float32([[1,0,-dy],[0,1,-dx]])
+    moved = cv2.warpAffine(rot, moveM, (img_info[-1].get('width'),img_info[-1].get('height')))
+
+    print(dx,dy)
+    cv2.imshow('wackelfrei', moved)
+    cv2.imshow('wackelnd', rot)
+    cv2.waitKey(1)
 
 print(img_info)
 # print(files)
@@ -89,13 +105,6 @@ cv2.circle(
         3
         )
 cv2.imshow('circles', rot)
-
-#fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
-#video = cv2.VideoWriter(filename="out.mp4", fourcc, 25, (width, height), True)
-#count = 0
-#
-#for name,data in img_info.items():
-#    print(name, data)
 
 
 #if __name__ == "__main__":
