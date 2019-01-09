@@ -291,22 +291,21 @@ ax.grid(True)
 
 # Annotate 2nd injection
 ax.annotate('optional 2nd,\ninjection',
-                  xy=(17, 42.5), xycoords='data',
-                  xytext=(50, 45.5), textcoords='data',
+                  xy=(17, 26), xycoords='data',
+                  xytext=(50, 26), textcoords='data',
                   size=8,
                   arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
-ax.annotate('end of µg', xy=(447, 43), xytext=(447, 45.5), textcoords='data', fontsize=8,
-            horizontalalignment='center')
+#ax.annotate('end of µg', xy=(440, 43), xytext=(447, 45.5), textcoords='data', fontsize=8,
+#            horizontalalignment='center')
 
 
 # annotate end of µg
 plt.axvline(x=440, ymin=0, ymax = 50, linewidth=1, color='k', linestyle='dashed')
 
-ax.annotate('continue till dust ist gone', (102+24*7+36*7, 36),
-            xytext=(1.0, 1.1), textcoords='axes fraction',
-            arrowprops=dict(facecolor='black', shrink=1, width=1),
-            fontsize=8,
-            horizontalalignment='right', verticalalignment='top')
+ax.annotate('end of µg', (440, 26), xycoords='data',
+            xytext=(470,26), textcoords='data',
+            size=8,
+            arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
 
 
 #ax.annotate('Phase I', (50,36), xytext=((22+24*7)/2,37), textcoords='data',
