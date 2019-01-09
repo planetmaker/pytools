@@ -78,6 +78,7 @@ add_component('scan particle',      'palevioletred',  [])
 add_component('Forced agglom.',     'lightpink',      [])
 add_component('Brownian motion',    'lightpink',      [])
 
+add_component('LDM read-out',       'olive',          [])
 add_component('LDM high-speed',     'olive',          [])
 add_component('LDM streaming',      'darkolivegreen', [])
 add_component('LDM camera',         'olivedrab',      [(-5,600)])
@@ -91,28 +92,46 @@ add_component('cogwheel',           'black',          [])
 max_memory = 8*1024*1024*1024 / 1920/1280 *8/12
 f_streaming = 185
 
+def OOS_mode(time, duration=0.1):
+    t = add_component_time('OOS illumination', (time, duration))
+    return t
+
+def LDM_readout(time, duration=0.2):
+    t = time
+    add_component_time('LDM read-out', (time, duration))
+    t= add_component_time('OOS illumination', (time, duration))
+    return t
+
 def LDM_highspeed(time, duration=0.02):
     t = time
+    add_component_time('LDM high-speed', (t, duration))
     t = add_component_time('LDM illumination', (t, duration))
+#    add_component_time('OOS illumination', (t, duration))
+#    t = add_component_time('LDM read-out', (t, duration))
     return t
 
 def LDM_stream(time, duration=0.1):
     t = time
+    add_component_time('LDM streaming', (t, duration))
     t = add_component_time('LDM illumination', (t, duration))
     return t
 
 def OOSLDM_mixed_mode(time, duration=0.1):
-    t = time
-    n = round(duration / 0.04)
-    unused_time = (duration+0.0005) % 0.04
-    if unused_time > 0.001:
-        print("No multiple of 40ms defined as mixed mode sequence! Unused time: " + str(unused_time))
-    # Alternatingly use OOS and LDM
-    for count in range(0, int(n)):
-        startt = t
-        t = add_component_time('LDM illumination', (t,0.02))
-        add_component_time('LDM streaming',    (startt, 0.02))
-        t = add_component_time('OOS illumination', (t,0.02))
+#    t = time
+#    n = round(duration / 0.04)
+#    unused_time = (duration+0.0005) % 0.04
+#    if unused_time > 0.001:
+#        print("No multiple of 40ms defined as mixed mode sequence! Unused time: " + str(unused_time))
+#    # Alternatingly use OOS and LDM
+#    for count in range(0, int(n)):
+#        startt = t
+#        t = add_component_time('LDM illumination', (t,0.02))
+#        add_component_time('LDM streaming',    (startt, 0.02))
+#        t = add_component_time('OOS illumination', (t,0.02))
+#    return t
+    add_component_time('LDM illumination', (time, duration))
+    add_component_time('LDM streaming', (time, duration))
+    t = add_component_time('OOS illumination', (time, duration))
     return t
 
 def adjust_CMS(time):
@@ -135,26 +154,32 @@ def restore_cloud(time):
 def scan_cloud(time):
     t = time
     # center particle back and forth, look with LDM, LSU and sometimes also OOS
-    t = add_component_time('CMS scan +x 1mm/s', (t,3))
-    t = add_component_time('CMS scan -x 1mm/s', (t,6))
-    t = add_component_time('CMS scan +x 1mm/s', (t,3))
+    t = add_component_time('CMS scan +x 1mm/s', (t,2))
+    t = add_component_time('CMS scan -x 1mm/s', (t,4))
+    t = add_component_time('CMS scan +x 1mm/s', (t,2))
     LDM_highspeed(time,t-time)
+    t = LDM_readout(t, t-time)
     return t
 def scan(time):
     t = time
     t = scan_cloud(t)
     return t
 
-def loop_brown(time, test=False):
+def loop_brown(time, add_readout=0):
     # observe 10s
+    t0 = time
     t = time
-    t = LDM_highspeed(t,1) # observe unperturbed 1s
+    t = LDM_highspeed(time,1) # observe unperturbed 1s
+    t = LDM_readout(t, 1)
+
+    if add_readout != 0:
+        t = LDM_readout(t, add_readout)
+
     t_start_levitate = t
-    t = OOSLDM_mixed_mode(t,7) # observe unperturbed, but levitate
+    t = OOSLDM_mixed_mode(t,9) # observe unperturbed, but levitate
     add_component_time('CMS levitate', (time,t-t_start_levitate))
     # t = adjust_CMS(t)
     t = scan_cloud(t)
-    add_component_time('Brownian motion',(time,t-time))
     return t
 
 def largest_particle(time):
@@ -183,13 +208,13 @@ def scan_e(time): # initial scan of the cloud
 def loop_agglomerate(time):
     t = time
     # electric measurement
-    t = add_component_time('CMS E +x', (t,3))
-    t = add_component_time('CMS E -x', (t,6))
-    t = add_component_time('CMS E +x', (t,3))
+    t = add_component_time('CMS E +x', (t,2))
+    t = add_component_time('CMS E -x', (t,4))
+    t = add_component_time('CMS E +x', (t,2))
     OOSLDM_mixed_mode(time,t-time)
     # squeezing
-    t = add_component_time('CMS squeeze', (t, 15))
-    OOSLDM_mixed_mode(t-15,15)
+    add_component_time('CMS squeeze', (t, 15))
+    t = OOSLDM_mixed_mode(t,15)
     # scan
     t = scan(t)
     add_component_time('Forced agglom.',(time,t-time))
@@ -222,7 +247,7 @@ def phase_brown(time, duration=202-22):
     # brownian motion first, Phase I
     # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
     t0 = time
-    t = loop_brown(t0)
+    t = loop_brown(t0, add_readout=3)
     loop_duration = t - t0
     n_loops, t_remain = divmod(duration, loop_duration)
     n_loops = int(n_loops)
@@ -230,6 +255,8 @@ def phase_brown(time, duration=202-22):
 
     for loop in range(1,int(n_loops)):
         t = loop_brown(t)
+
+    add_component_time('Brownian motion', (t0, t-t0))
 
     print("{:6.1f}: Brownian motion finished.".format(t))
     return t
