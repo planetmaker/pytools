@@ -26,14 +26,24 @@ class Component(object):
         self.position = position
         self.on_time = on_time
 
+    def add_time(self, time):
+        self.on_time.append(time)
+        return time[0] + time[1]
+
     def __str__(self):
         return self.name
+
 
 #class Camera(Component):
 #    def __init__(self, name, color, position, on_time):
 #        __super__.init(self, name, color, position, on_time)
 #        self.max_recording_time = 10 # Set to the actual value in seconds
-#        self.recorded_time = 0
+#        self.download_time      = 20 # Time to download the whole memory
+#        self.remaining_rec_time = self.max_recording_time
+#
+#    def add_time(self, time):
+#        __super__.add_time(self, time)
+#        self.remaining_rec_time -= time[1]
 
 
 def add_component(name, color, on_time):
@@ -135,7 +145,7 @@ def scan(time):
     t = scan_cloud(t)
     return t
 
-def loop_brown(time):
+def loop_brown(time, test=False):
     # observe 10s
     t = time
     t = LDM_highspeed(t,1) # observe unperturbed 1s
@@ -211,26 +221,28 @@ def phase_injection(time):
 def phase_brown(time, duration=202-22):
     # brownian motion first, Phase I
     # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
-    loop_duration = loop_brown(0)
+    t0 = time
+    t = loop_brown(t0)
+    loop_duration = t - t0
     n_loops, t_remain = divmod(duration, loop_duration)
     n_loops = int(n_loops)
     print("        Executing {} Brown loops of {:4.1f}s length each. {:4.1f}s unused.".format(n_loops, loop_duration, t_remain))
 
-    t = time
-    for loop in range(0,int(n_loops)):
+    for loop in range(1,int(n_loops)):
         t = loop_brown(t)
 
     print("{:6.1f}: Brownian motion finished.".format(t))
     return t
 
 def phase_agglomerate(time, duration=395-220):
-    loop_duration= loop_agglomerate(0)
+    t0 = time
+    t = loop_agglomerate(t0)
+    loop_duration= t - t0
     n_loops, t_remain = divmod(duration, loop_duration)
     n_loops = int(n_loops)
     print("        Executing {} agglomeration loops of {:4.1f}s length each. {:4.1f}s unused.".format(n_loops, loop_duration, t_remain))
 
-    t = time
-    for loop in range(0, int(n_loops)):
+    for loop in range(1, int(n_loops)):
         t = loop_agglomerate(t)
 
     print("{:6.1f}: Forced agglomeration finished.".format(t))
