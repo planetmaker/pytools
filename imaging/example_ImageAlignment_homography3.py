@@ -30,7 +30,7 @@ criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT,
 (cc, warp_matrix) = cv2.findTransformECC(im1, im2, warp_matrix,
                                          warp_mode, criteria)
 
-Lastly, one “only” needs to warp the image with the found affine transformation:
+# Lastly, one “only” needs to warp the image with the found affine transformation:
 
 aligned_image = cv2.warpAffine(
                           unaligned_image,
