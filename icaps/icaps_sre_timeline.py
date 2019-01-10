@@ -3,119 +3,138 @@
 Make the ICAPS timeline
 """
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
+# from matplotlib.patches import Ellipse
 
 components = {}
+fps_streaming = 250
+fps_burst     = 1000
 
-def add_component_time(name, time):
-    """
-    Add a new timeslot to the component
-    """
-    old_time = components.get(name).on_time
-    old_time.append(time)
-    components[name].on_time = old_time
-    return time[0] + time[1]
+#def add_component_time(name, time):
+#    """
+#    Add a new timeslot to the component
+#    """
+#    old_time = components.get(name).on_time
+#    old_time.append(time)
+#    components[name].on_time = old_time
+#    return time[0] + time[1]
+
+print(components)
 
 class Component(object):
-    def __init__(self, name, color, position, on_time):
+    def __init__(self, name, color, position):
         """
         Component definition
         """
         self.name = name
         self.color = color
         self.position = position
-        self.on_time = on_time
+        self.dutycycle = []
+        components[name] = self
 
-    def add_time(self, time):
-        self.on_time.append(time)
-        return time[0] + time[1]
+    def add_time(self, timeslot):
+        self.dutycycle.append(timeslot)
+        return timeslot[0] + timeslot[1]
 
     def __str__(self):
         return self.name
 
 
-#class Camera(Component):
-#    def __init__(self, name, color, position, on_time):
-#        __super__.init(self, name, color, position, on_time)
-#        self.max_recording_time = 10 # Set to the actual value in seconds
-#        self.download_time      = 20 # Time to download the whole memory
-#        self.remaining_rec_time = self.max_recording_time
-#
-#    def add_time(self, time):
-#        __super__.add_time(self, time)
-#        self.remaining_rec_time -= time[1]
+class Camera(Component):
+    def __init__(self, name, color, position, stream_fps=250, burst_fps=1000, download_fps=250, max_ram_images=24298, max_ssd_images=360672):
+        super().__init__(name, color, position)
+        self.stream_fps = stream_fps             # maximum framerate for streaming
+        self.burst_fps  = burst_fps              # Time to download the whole memory
+        self.download_fps = download_fps         # Rate at which images are downloaded from camera to HDD
+        self.max_ram_images = max_ram_images     # Maximum amount of images which can be stored in volatile camera memory (used-up when fps > stream_fps)
+        self.max_ssd_images = max_ssd_images     # Maximum amount of images which can be stored in total
+        self.ram_images     = 0                  # Number of currently stored images in the volatile memory
+        self.total_images   = 0
+        self.fps = []
 
+    def num_images(self, timeslot, fps=250):
+        return timeslot[1]* fps
 
-def add_component(name, color, on_time):
+    def remaining_images(self):
+        return self.stored_images
+
+    def add_time(self, timeslot, fps=250):
+        super().add_time(timeslot)
+        num_images = self.num_images(timeslot, fps)
+        if fps > self.stream_fps:
+            self.ram_images += num_images
+        self.total_images += num_images
+        self.fps.append(fps)
+
+def add_component(name, color, timeslot=None, ctype=Component):
     """
     construct a component and add it to L{components}
     """
-    component = Component(name, color, 0, on_time)
+    component = ctype(name, color, 0)
+    if timeslot is not None:
+        component.add_time(timeslot)
     components[name] = component
 
 # name, color, [ (start, duration), (start, duration), ...]
 
-add_component('restore cloud',      'mediumpurple',   [])
-add_component('center particle',    'mediumpurple',   [])
-add_component('adjust CMS',         'darkorchid',     [])
-add_component('measure cloud v',    'blueviolet',     [])
-add_component('CMS levitate',       'slateblue',      [])
-add_component('CMS squeeze',        'slateblue',      [])
+#
+add_component('restore cloud',      'mediumpurple')
+add_component('center particle',    'mediumpurple')
+add_component('adjust CMS',         'darkorchid')
+add_component('measure cloud v',    'blueviolet')
+add_component('CMS levitate',       'slateblue')
+add_component('CMS squeeze',        'slateblue')
 
-add_component('OOS illumination',   'peru',           [])
-add_component('LDM illumination',   'yellow',         [])
+add_component('OOS illumination',   'peru')
+add_component('LDM illumination',   'yellow')
 
-add_component('CMS scan -x 1mm/s',  'skyblue',        [])
-add_component('CMS scan +x 1mm/s',  'deepskyblue',    [])
-add_component('CMS E -x',           'aqua',           [])
-add_component('CMS E +x',           'aquamarine',     [])
-add_component('CMS E -y',           'aqua',           [])
-add_component('CMS E +y',           'aquamarine',     [])
-add_component('CMS E -z',           'aqua',           [])
-add_component('CMS E +z',           'aquamarine',     [])
+add_component('CMS scan -x 1mm/s',  'skyblue')
+add_component('CMS scan +x 1mm/s',  'deepskyblue')
+add_component('CMS E -x',           'aqua')
+add_component('CMS E +x',           'aquamarine')
+add_component('CMS E -y',           'aqua')
+add_component('CMS E +y',           'aquamarine')
+add_component('CMS E -z',           'aqua')
+add_component('CMS E +z',           'aquamarine')
 
-add_component('scan particle',      'palevioletred',  [])
-add_component('Forced agglom.',     'lightpink',      [])
-add_component('Brownian motion',    'lightpink',      [])
+add_component('scan particle',      'palevioletred')
+add_component('Forced agglom.',     'lightpink')
+add_component('Brownian motion',    'lightpink')
 
-add_component('LDM read-out',       'olive',          [])
-add_component('LDM high-speed',     'olive',          [])
-add_component('LDM streaming',      'darkolivegreen', [])
-add_component('LDM camera',         'olivedrab',      [(-5,600)])
-add_component('OOS camera',         'yellowgreen',    [(-5,600)])
+add_component('LDM read-out',       'olive', ctype=Camera)
+add_component('LDM high-speed',     'olive', ctype=Camera)
+add_component('LDM stream',         'darkolivegreen', ctype=Camera)
+add_component('LDM stream power',   'olivedrab',   timeslot=(-5,600))
+add_component('OOS camera',         'yellowgreen', timeslot=(-5,600))
 
-add_component('analyse injection',  'lightgrey',      [])
-add_component('open shutter valve', 'dimgray',        [])
-add_component('injection piston',   'gray',           [])
-add_component('cogwheel',           'black',          [])
+add_component('analyse injection',  'lightgrey')
+add_component('open shutter valve', 'dimgray')
+add_component('injection piston',   'gray')
+add_component('cogwheel',           'black')
 
-max_memory = 8*1024*1024*1024 / 1920/1280 *8/12
-f_streaming = 185
-
-def OOS_mode(time, duration=0.1):
-    t = add_component_time('OOS illumination', (time, duration))
-    return t
-
+#def OOS_mode(time, duration=0.1):
+#    t = add_component_time('OOS illumination', (time, duration))
+#    return t
+#
 def LDM_readout(time, duration=0.2):
     t = time
-    add_component_time('LDM read-out', (time, duration))
-    t= add_component_time('OOS illumination', (time, duration))
+    components['LDM read-out'].add_time((time, duration))
+    t= components['OOS illumination'].add_time((time, duration))
     return t
 
 def LDM_highspeed(time, duration=0.02):
     t = time
-    add_component_time('LDM high-speed', (t, duration))
-    t = add_component_time('LDM illumination', (t, duration))
-#    add_component_time('OOS illumination', (t, duration))
-#    t = add_component_time('LDM read-out', (t, duration))
+    components['LDM high-speed'].add_time((t, duration))
+    t = components['LDM illumination'].add_time((t, duration))
+#    components['OOS illumination'].add_time((t, duration))
+#    t = components['LDM read-out'].add_time((t, duration))
     return t
 
 def LDM_stream(time, duration=0.1):
     t = time
-    add_component_time('LDM streaming', (t, duration))
-    t = add_component_time('LDM illumination', (t, duration))
+    components['LDM stream'].add_time((t, duration))
+    t = components['LDM illumination'].add_time((t, duration))
     return t
-
+#
 def OOSLDM_mixed_mode(time, duration=0.1):
 #    t = time
 #    n = round(duration / 0.04)
@@ -125,40 +144,44 @@ def OOSLDM_mixed_mode(time, duration=0.1):
 #    # Alternatingly use OOS and LDM
 #    for count in range(0, int(n)):
 #        startt = t
-#        t = add_component_time('LDM illumination', (t,0.02))
-#        add_component_time('LDM streaming',    (startt, 0.02))
-#        t = add_component_time('OOS illumination', (t,0.02))
+#        t = components['LDM illumination'].add_time((t,0.02))
+#        components['LDM stream',    (startt, 0.02))
+#        t = components['OOS illumination'].add_time((t,0.02))
 #    return t
-    add_component_time('LDM illumination', (time, duration))
-    add_component_time('LDM streaming', (time, duration))
-    t = add_component_time('OOS illumination', (time, duration))
+    components['LDM illumination'].add_time((time, duration))
+    components['LDM stream'].add_time((time, duration), fps=fps_streaming)
+    t = components['OOS illumination'].add_time((time, duration))
+#    components['LDM illumination'].add_time((time, duration))
+#    components['LDM stream'].add_time((time, duration))
+#    t = components['OOS illumination'].add_time((time, duration))
     return t
-
+#
 def adjust_CMS(time):
     t = time
-    t = add_component_time('measure cloud v', (t,1))
-    t = add_component_time('adjust CMS', (t,1))
+    t = components['measure cloud v'].add_time((t,1))
+    t = components['adjust CMS'].add_time((t,1))
     OOSLDM_mixed_mode(time,t-time)
     return t
 def position_particle(time):
     t = time
     t = OOSLDM_mixed_mode(t,3)
-    add_component_time('center particle',(time,t-time))
+    components['center particle'].add_time((time,t-time))
     return t
 def restore_cloud(time):
     t = time
     t = OOSLDM_mixed_mode(t,3)
-    add_component_time('restore cloud',(time,t-time))
+    components['restore cloud'].add_time((time,t-time))
     return t
 
 def scan_cloud(time):
     t = time
     # center particle back and forth, look with LDM, LSU and sometimes also OOS
-    t = add_component_time('CMS scan +x 1mm/s', (t,2))
-    t = add_component_time('CMS scan -x 1mm/s', (t,4))
-    t = add_component_time('CMS scan +x 1mm/s', (t,2))
-    LDM_highspeed(time,t-time)
-    t = LDM_readout(t, t-time)
+    t = components['CMS scan +x 1mm/s'].add_time((t,3))
+    t = components['CMS scan -x 1mm/s'].add_time((t,6))
+    t = components['CMS scan +x 1mm/s'].add_time((t,3))
+#    LDM_highspeed(time,t-time)
+#    t = LDM_readout(t, t-time)
+    LDM_stream(time, t-time)
     return t
 def scan(time):
     t = time
@@ -167,17 +190,16 @@ def scan(time):
 
 def loop_brown(time, add_readout=0):
     # observe 10s
-    t0 = time
     t = time
     t = LDM_highspeed(time,1) # observe unperturbed 1s
-    t = LDM_readout(t, 1)
+    t = LDM_readout(t, 4)
 
     if add_readout != 0:
         t = LDM_readout(t, add_readout)
 
     t_start_levitate = t
-    t = OOSLDM_mixed_mode(t,9) # observe unperturbed, but levitate
-    add_component_time('CMS levitate', (time,t-t_start_levitate))
+    t = OOSLDM_mixed_mode(t,6) # observe unperturbed, but levitate
+    components['CMS levitate'].add_time((time,t-t_start_levitate))
     # t = adjust_CMS(t)
     t = scan_cloud(t)
     return t
@@ -188,19 +210,19 @@ def largest_particle(time):
     t = position_particle(t) # 3s
     scan_t = t
     t = scan(t) # 12s
-    add_component_time('scan particle', (scan_t,t-scan_t))
+    components['scan particle'].add_time((scan_t,t-scan_t))
     t = restore_cloud(t) # 3
     print("{:6.1f}: Largest particle finished in {:4.1f}s.".format(t,t-time))
     return t
 
 def scan_e(time): # initial scan of the cloud
     t = time
-    t = add_component_time('CMS E +x', (t, 0.5))
-    t = add_component_time('CMS E -x', (t, 0.5))
-    t = add_component_time('CMS E +y', (t, 0.5))
-    t = add_component_time('CMS E -y', (t, 0.5))
-    t = add_component_time('CMS E +z', (t, 0.5))
-    t = add_component_time('CMS E -z', (t, 0.5))
+    t = components['CMS E +x'].add_time((t, 0.5))
+    t = components['CMS E -x'].add_time((t, 0.5))
+    t = components['CMS E +y'].add_time((t, 0.5))
+    t = components['CMS E -y'].add_time((t, 0.5))
+    t = components['CMS E +z'].add_time((t, 0.5))
+    t = components['CMS E -z'].add_time((t, 0.5))
     LDM_highspeed(time, t-time)
     print("        Charge scan particle: {:4.1f}".format(t-time))
     return t
@@ -208,41 +230,40 @@ def scan_e(time): # initial scan of the cloud
 def loop_agglomerate(time):
     t = time
     # electric measurement
-    t = add_component_time('CMS E +x', (t,2))
-    t = add_component_time('CMS E -x', (t,4))
-    t = add_component_time('CMS E +x', (t,2))
+    t = components['CMS E +x'].add_time((t,2))
+    t = components['CMS E -x'].add_time((t,4))
+    t = components['CMS E +x'].add_time((t,2))
     OOSLDM_mixed_mode(time,t-time)
     # squeezing
-    add_component_time('CMS squeeze', (t, 15))
+    components['CMS squeeze'].add_time((t, 15))
     t = OOSLDM_mixed_mode(t,15)
     # scan
     t = scan(t)
-    add_component_time('Forced agglom.',(time,t-time))
+    components['Forced agglom.'].add_time((time,t-time))
     print("        Loop agglomerate: {:4.1f}".format(t-time))
     return t
 
-################################################
-### Define the actual sequences below here #####
-################################################
-
-
+#################################################
+#### Define the actual sequences below here #####
+#################################################
+#
+#
 def phase_injection(time):
     t = time
     # First 22 seconds are injection. That's directly defined above in the item definitions
-    add_component_time('cogwheel', (-30,60))
-    # add_component_time('LSU illumination', (-20,5))
+    components['cogwheel'].add_time((-30,60))
+    components['injection piston'].add_time((-1,6))
+    components['open shutter valve'].add_time((0,5))
 
-    add_component_time('injection piston', (-1,6))
-    add_component_time('open shutter valve', (0,5))
-    t = add_component_time('analyse injection',    (5,20))
+    t = components['analyse injection'].add_time((5,20))
     OOSLDM_mixed_mode(-1,t+1)
-
-    # possible re-injection
-    add_component_time('open shutter valve', (15,5))
-    add_component_time('injection piston', (14,6))
+#
+#    # possible re-injection
+    components['open shutter valve'].add_time((15,5))
+    components['injection piston'].add_time((14,6))
     print("{:6.1f}: Injection finished".format(t))
     return t
-
+#
 def phase_brown(time, duration=202-22):
     # brownian motion first, Phase I
     # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
@@ -256,7 +277,7 @@ def phase_brown(time, duration=202-22):
     for loop in range(1,int(n_loops)):
         t = loop_brown(t)
 
-    add_component_time('Brownian motion', (t0, t-t0))
+    components['Brownian motion'].add_time((t0, t-t0))
 
     print("{:6.1f}: Brownian motion finished.".format(t))
     return t
@@ -274,10 +295,10 @@ def phase_agglomerate(time, duration=395-220):
 
     print("{:6.1f}: Forced agglomeration finished.".format(t))
     return t
-
-
-
-
+#
+#
+#
+#
 total_time = phase_injection(0)
 
 # Do some initial measurements on the freshly-injected particles
@@ -300,31 +321,31 @@ for loop in range(0,3):
 # continue until end: Phase V
 for loop in range(0,4):
     total_time = loop_agglomerate(total_time)
-
-
+#
+#
 fig, ax = plt.subplots()
-#ax.broken_barh([(110, 30), (150, 10)], (10, 9), facecolors='blue')
-#ax.broken_barh([(10, 50), (100, 20), (130, 10)], (20, 9),
-               #facecolors=('red', 'yellow', 'green'))
-# [(xstart, duration)], (ystart, height), facecolors=('color')
+##ax.broken_barh([(110, 30), (150, 10)], (10, 9), facecolors='blue')
+##ax.broken_barh([(10, 50), (100, 20), (130, 10)], (20, 9),
+#               #facecolors=('red', 'yellow', 'green'))
+## [(xstart, duration)], (ystart, height), facecolors=('color')
 ticks = [0] * len(components)
-
+#
 with open('/home/ingo/idltools/icaps_test.txt', 'w') as thefile:
     for index, item in enumerate(components, start = 1):
-        time = components.get(item).on_time
+        dutycycle = components.get(item).dutycycle
         color = components.get(item).color
-        ax.broken_barh(time, (index, 0.5), facecolors=color)
+        ax.broken_barh(dutycycle, (index, 0.5), facecolors=color)
         ticks[index-1] = index
         thefile.write("%s: " % item)
-        thefile.write("%s\n" % components.get(item).on_time)
+        thefile.write("%s\n" % dutycycle)
     thefile.close()
-
+#
 ax.set_yticklabels(components)
 
 ax.set_ylim(0, max(ticks)+1)
 ax.set_xlim(-100, 600)
 ax.set_xlabel('seconds since start of micro-g')
-
+#
 ax.set_yticks(ticks)
 ax.grid(True)
 
@@ -334,8 +355,8 @@ ax.annotate('optional 2nd,\ninjection',
                   xytext=(50, 26), textcoords='data',
                   size=8,
                   arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
-#ax.annotate('end of µg', xy=(440, 43), xytext=(447, 45.5), textcoords='data', fontsize=8,
-#            horizontalalignment='center')
+ax.annotate('end of µg', xy=(440, 43), xytext=(447, 45.5), textcoords='data', fontsize=8,
+            horizontalalignment='center')
 
 
 # annotate end of µg
@@ -345,17 +366,17 @@ ax.annotate('end of µg', (440, 26), xycoords='data',
             xytext=(470,26), textcoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
-
-
-#ax.annotate('Phase I', (50,36), xytext=((22+24*7)/2,37), textcoords='data',
-            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-#ax.annotate('Phase II', (50,36), xytext=(22+24*7+20,37), textcoords='data',
-            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-#ax.annotate('Phase III', (50,36), xytext=(42+24*7+36*3+20,37), textcoords='data',
-            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-#ax.annotate('Phase IV', (50,36), xytext=(42+24*7+36*7+20,37), textcoords='data',
-            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-#ax.annotate('Brownian motion', (
-
+#
+#
+##ax.annotate('Phase I', (50,36), xytext=((22+24*7)/2,37), textcoords='data',
+#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
+##ax.annotate('Phase II', (50,36), xytext=(22+24*7+20,37), textcoords='data',
+#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
+##ax.annotate('Phase III', (50,36), xytext=(42+24*7+36*3+20,37), textcoords='data',
+#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
+##ax.annotate('Phase IV', (50,36), xytext=(42+24*7+36*7+20,37), textcoords='data',
+#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
+##ax.annotate('Brownian motion', (
+#
 plt.subplots_adjust(left=0.15)
 plt.show()
