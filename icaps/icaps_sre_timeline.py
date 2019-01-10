@@ -4,10 +4,13 @@ Make the ICAPS timeline
 """
 import matplotlib.pyplot as plt
 # from matplotlib.patches import Ellipse
+from matplotlib.patches import Rectangle
 
 components = {}
 fps_streaming = 250
 fps_burst     = 1000
+
+end_mug = 440 # seconds
 
 #def add_component_time(name, time):
 #    """
@@ -89,12 +92,12 @@ add_component('LDM illumination',   'yellow')
 
 add_component('CMS scan -x 1mm/s',  'skyblue')
 add_component('CMS scan +x 1mm/s',  'deepskyblue')
-add_component('CMS E -x',           'aqua')
-add_component('CMS E +x',           'aquamarine')
-add_component('CMS E -y',           'aqua')
-add_component('CMS E +y',           'aquamarine')
-add_component('CMS E -z',           'aqua')
-add_component('CMS E +z',           'aquamarine')
+add_component('CMS E -x',           'steelblue')
+add_component('CMS E +x',           'dodgerblue')
+add_component('CMS E -y',           'steelblue')
+add_component('CMS E +y',           'dodgerblue')
+add_component('CMS E -z',           'steelblue')
+add_component('CMS E +z',           'dodgerblue')
 
 add_component('scan particle',      'palevioletred')
 add_component('Forced agglom.',     'lightpink')
@@ -300,11 +303,14 @@ def phase_agglomerate(time, duration=395-220):
 #
 #
 total_time = phase_injection(0)
+injection_time = total_time
 
 # Do some initial measurements on the freshly-injected particles
 total_time = scan_e(total_time)
+scan_e_time = total_time
 
 # Brownian growth
+start_brown = total_time
 total_time = phase_brown(total_time)
 
 # Analyse the largest particle grown due to Brownian motion: Phase II
@@ -312,9 +318,12 @@ total_time = largest_particle(total_time)
 
 # Use forced agglomeration to grow larger particles: Phase III
 # Each takes 36 seconds: 12s electric analysis, 12s squeezing, 12s analysis
+start_agglomerate = total_time
 total_time = phase_agglomerate(total_time)
 
 # Image the three largest particles grown: Phase IV
+
+end_agglomerate = total_time
 for loop in range(0,3):
     total_time = largest_particle(total_time)
 
@@ -359,13 +368,47 @@ ax.annotate('end of µg', xy=(440, 43), xytext=(447, 45.5), textcoords='data', f
             horizontalalignment='center')
 
 
-# annotate end of µg
-plt.axvline(x=440, ymin=0, ymax = 50, linewidth=1, color='k', linestyle='dashed')
+# Annotate scan for charges
+rect = Rectangle((scan_e_time-10,11),20,6,fill=False,color='black',linewidth=1.5,linestyle='-')
+#rect = Rectangle((0.5,0.5),0.1,0.1,fill=True,color='black',linewidth=5,linestyle='-',figure=ax)
+ax.add_patch(rect)
+ax.annotate('short scan for charge\n0.5s each direction', (scan_e_time+10, 12), xycoords='data',
+            xytext=(scan_e_time+25, 11.5), textcoords='data',
+            size=8,
+            arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
 
-ax.annotate('end of µg', (440, 26), xycoords='data',
+# annotate different phases
+ax.annotate('Brownian phase', (start_brown+(start_agglomerate - start_brown) / 2, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+ax.annotate('Agglomeration phase', (start_agglomerate+(end_agglomerate - start_agglomerate) / 2, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+ax.annotate('Scan', (end_agglomerate+(end_mug - end_agglomerate) / 2, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+
+# indicate exact times
+uppery = 0.95
+plt.axvline(x=start_brown, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
+plt.axvline(x=start_agglomerate, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
+plt.axvline(x=end_agglomerate, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
+# annotate end of µg
+plt.axvline(x=end_mug, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
+
+ax.annotate('{:3.0f}s'.format(start_brown), (start_brown+5, 28), textcoords='data',
+            size=10, horizontalalignment='left')
+ax.annotate('{:3.0f}s'.format(start_agglomerate), (start_agglomerate, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+ax.annotate('{:3.0f}s'.format(end_agglomerate), (end_agglomerate, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+ax.annotate('{:3.0f}s'.format(end_mug), (end_mug, 28), textcoords='data',
+            size=10, horizontalalignment='center')
+
+ax.annotate('end of µg', (end_mug, 26), xycoords='data',
             xytext=(470,26), textcoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
+
+
+
 #
 #
 ##ax.annotate('Phase I', (50,36), xytext=((22+24*7)/2,37), textcoords='data',
