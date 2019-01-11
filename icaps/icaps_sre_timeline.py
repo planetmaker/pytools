@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Make the ICAPS timeline
+
+TODO:
+    * LDM light off when OOS light is on
+    * OOS illumination must be on during CMS scan +- 1mm
 """
 import matplotlib.pyplot as plt
 # from matplotlib.patches import Ellipse
@@ -10,7 +14,9 @@ components = {}
 fps_streaming = 250
 fps_burst     = 1000
 
-end_mug = 440 # seconds
+end_mug = 375 # seconds
+brown_time = 150 # seconds
+agglomeration_time = 150 # seconds
 
 #def add_component_time(name, time):
 #    """
@@ -184,7 +190,7 @@ def scan_cloud(time):
     t = components['CMS scan +x 1mm/s'].add_time((t,3))
 #    LDM_highspeed(time,t-time)
 #    t = LDM_readout(t, t-time)
-    LDM_stream(time, t-time)
+    OOSLDM_mixed_mode(time, t-time)
     return t
 def scan(time):
     t = time
@@ -194,17 +200,20 @@ def scan(time):
 def loop_brown(time, add_readout=0):
     # observe 10s
     t = time
-    t = LDM_highspeed(time,1) # observe unperturbed 1s
-    t = LDM_readout(t, 4)
-
     if add_readout != 0:
         t = LDM_readout(t, add_readout)
 
     t_start_levitate = t
-    t = OOSLDM_mixed_mode(t,6) # observe unperturbed, but levitate
-    components['CMS levitate'].add_time((time,t-t_start_levitate))
+    t = OOSLDM_mixed_mode(t,5) # observe unperturbed, but levitate
     # t = adjust_CMS(t)
     t = scan_cloud(t)
+
+    components['CMS levitate'].add_time((time,t-t_start_levitate))
+
+    t = LDM_highspeed(t,1) # observe unperturbed 1s
+    t = LDM_readout(t, 4)
+    # print("        Brown from {} to {}".format(time, t))
+
     return t
 
 def largest_particle(time):
@@ -267,7 +276,7 @@ def phase_injection(time):
     print("{:6.1f}: Injection finished".format(t))
     return t
 #
-def phase_brown(time, duration=202-22):
+def phase_brown(time, duration=brown_time):
     # brownian motion first, Phase I
     # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
     t0 = time
@@ -285,7 +294,7 @@ def phase_brown(time, duration=202-22):
     print("{:6.1f}: Brownian motion finished.".format(t))
     return t
 
-def phase_agglomerate(time, duration=395-220):
+def phase_agglomerate(time, duration=agglomeration_time):
     t0 = time
     t = loop_agglomerate(t0)
     loop_duration= t - t0
@@ -311,7 +320,7 @@ scan_e_time = total_time
 
 # Brownian growth
 start_brown = total_time
-total_time = phase_brown(total_time)
+total_time = phase_brown(total_time, duration=120)
 
 # Analyse the largest particle grown due to Brownian motion: Phase II
 total_time = largest_particle(total_time)
@@ -319,7 +328,7 @@ total_time = largest_particle(total_time)
 # Use forced agglomeration to grow larger particles: Phase III
 # Each takes 36 seconds: 12s electric analysis, 12s squeezing, 12s analysis
 start_agglomerate = total_time
-total_time = phase_agglomerate(total_time)
+total_time = phase_agglomerate(total_time, duration=180)
 
 # Image the three largest particles grown: Phase IV
 
