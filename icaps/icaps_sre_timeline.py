@@ -320,7 +320,7 @@ scan_e_time = total_time
 
 # Brownian growth
 start_brown = total_time
-total_time = phase_brown(total_time, duration=120)
+total_time = phase_brown(total_time, duration=180)
 
 # Analyse the largest particle grown due to Brownian motion: Phase II
 total_time = largest_particle(total_time)
@@ -328,7 +328,7 @@ total_time = largest_particle(total_time)
 # Use forced agglomeration to grow larger particles: Phase III
 # Each takes 36 seconds: 12s electric analysis, 12s squeezing, 12s analysis
 start_agglomerate = total_time
-total_time = phase_agglomerate(total_time, duration=180)
+total_time = phase_agglomerate(total_time, duration=120)
 
 # Image the three largest particles grown: Phase IV
 
