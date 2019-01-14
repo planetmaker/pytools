@@ -183,10 +183,6 @@ def scan_e(time): # initial scan of the cloud
 
 def loop_agglomerate(time):
     t = time
-    # electric measurement
-    t = components['CMS E +z'].add_time((t,2))
-    t = components['CMS E -z'].add_time((t,4))
-    t = components['CMS E +z'].add_time((t,2))
     # squeezing
     t = components['CMS squeeze'].add_time((t, 15))
     # scan
@@ -246,15 +242,25 @@ def phase_brown(time, duration=brown_time):
     return t
 
 def phase_agglomerate(time, duration=agglomeration_time):
-    t0 = time
+    # electric measurement
+    t = time
+    t = components['CMS E +z'].add_time((t,2))
+    t = components['CMS E -z'].add_time((t,4))
+    t = components['CMS E +z'].add_time((t,2))
+    t0 = t
     t = loop_agglomerate(t0)
     loop_duration= t - t0
-    n_loops, t_remain = divmod(duration, loop_duration)
+    n_loops, t_remain = divmod(duration-2*8, loop_duration) # reduce by E-scan at start and end
     n_loops = int(n_loops)
     print("        Executing {} agglomeration loops of {:4.1f}s length each. {:4.1f}s unused.".format(n_loops, loop_duration, t_remain))
 
     for loop in range(1, int(n_loops)):
         t = loop_agglomerate(t)
+
+    # Final E-scan
+    t = components['CMS E +z'].add_time((t,2))
+    t = components['CMS E -z'].add_time((t,4))
+    t = components['CMS E +z'].add_time((t,2))
 
     print("{:6.1f}: Forced agglomeration finished.".format(t))
     return t
