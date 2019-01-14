@@ -9,14 +9,16 @@ TODO:
 import matplotlib.pyplot as plt
 # from matplotlib.patches import Ellipse
 from matplotlib.patches import Rectangle
+from matplotlib.offsetbox import (TextArea, AnnotationBbox)
 
 components = {}
-fps_streaming = 250
-fps_burst     = 1000
 
 end_mug = 375 # seconds
 brown_time = 150 # seconds
 agglomeration_time = 150 # seconds
+
+tmin = -50
+tmax = 450
 
 #def add_component_time(name, time):
 #    """
@@ -87,32 +89,26 @@ def add_component(name, color, timeslot=None, ctype=Component):
 
 #
 add_component('restore cloud',      'mediumpurple')
-add_component('center particle',    'mediumpurple')
-add_component('adjust CMS',         'darkorchid')
+add_component('center agglomerate', 'mediumpurple')
 add_component('measure cloud v',    'blueviolet')
+
 add_component('CMS levitate',       'slateblue')
 add_component('CMS squeeze',        'slateblue')
+add_component('CMS scan -x [1]',        'skyblue')
+add_component('CMS scan +x [1]',        'deepskyblue')
 
-add_component('OOS illumination',   'peru')
-add_component('LDM illumination',   'yellow')
-
-add_component('CMS scan -x 1mm/s',  'skyblue')
-add_component('CMS scan +x 1mm/s',  'deepskyblue')
-add_component('CMS E -x',           'steelblue')
-add_component('CMS E +x',           'dodgerblue')
-add_component('CMS E -y',           'steelblue')
-add_component('CMS E +y',           'dodgerblue')
 add_component('CMS E -z',           'steelblue')
 add_component('CMS E +z',           'dodgerblue')
 
-add_component('scan particle',      'palevioletred')
+add_component('Scan cloud',         'salmon')
+add_component('Scan agglomerate',   'palevioletred')
 add_component('Forced agglom.',     'lightpink')
 add_component('Brownian motion',    'lightpink')
 
-add_component('LDM read-out',       'olive', ctype=Camera)
-add_component('LDM high-speed',     'olive', ctype=Camera)
-add_component('LDM stream',         'darkolivegreen', ctype=Camera)
-add_component('LDM stream power',   'olivedrab',   timeslot=(-5,600))
+add_component('LDM illumination',   'yellow',      timeslot=(-5,600))
+add_component('OOS illumination',   'peru',        timeslot=(-5,600))
+
+add_component('LDM camera',         'olivedrab',   timeslot=(-5,600))
 add_component('OOS camera',         'yellowgreen', timeslot=(-5,600))
 
 add_component('analyse injection',  'lightgrey')
@@ -124,133 +120,74 @@ add_component('cogwheel',           'black')
 #    t = add_component_time('OOS illumination', (time, duration))
 #    return t
 #
-def LDM_readout(time, duration=0.2):
+
+def position_particle(time, duration=1):
     t = time
-    components['LDM read-out'].add_time((time, duration))
-    t= components['OOS illumination'].add_time((time, duration))
+    t = components['center agglomerate'].add_time((time,duration))
+    return t
+def restore_cloud(time, duration=1):
+    t = time
+    t = components['restore cloud'].add_time((time,duration))
     return t
 
-def LDM_highspeed(time, duration=0.02):
+def scan(time):
     t = time
-    components['LDM high-speed'].add_time((t, duration))
-    t = components['LDM illumination'].add_time((t, duration))
-#    components['OOS illumination'].add_time((t, duration))
-#    t = components['LDM read-out'].add_time((t, duration))
-    return t
-
-def LDM_stream(time, duration=0.1):
-    t = time
-    components['LDM stream'].add_time((t, duration))
-    t = components['LDM illumination'].add_time((t, duration))
-    return t
-#
-def OOSLDM_mixed_mode(time, duration=0.1):
-#    t = time
-#    n = round(duration / 0.04)
-#    unused_time = (duration+0.0005) % 0.04
-#    if unused_time > 0.001:
-#        print("No multiple of 40ms defined as mixed mode sequence! Unused time: " + str(unused_time))
-#    # Alternatingly use OOS and LDM
-#    for count in range(0, int(n)):
-#        startt = t
-#        t = components['LDM illumination'].add_time((t,0.02))
-#        components['LDM stream',    (startt, 0.02))
-#        t = components['OOS illumination'].add_time((t,0.02))
-#    return t
-    components['LDM illumination'].add_time((time, duration))
-    components['LDM stream'].add_time((time, duration), fps=fps_streaming)
-    t = components['OOS illumination'].add_time((time, duration))
-#    components['LDM illumination'].add_time((time, duration))
-#    components['LDM stream'].add_time((time, duration))
-#    t = components['OOS illumination'].add_time((time, duration))
-    return t
-#
-def adjust_CMS(time):
-    t = time
-    t = components['measure cloud v'].add_time((t,1))
-    t = components['adjust CMS'].add_time((t,1))
-    OOSLDM_mixed_mode(time,t-time)
-    return t
-def position_particle(time):
-    t = time
-    t = OOSLDM_mixed_mode(t,3)
-    components['center particle'].add_time((time,t-time))
-    return t
-def restore_cloud(time):
-    t = time
-    t = OOSLDM_mixed_mode(t,3)
-    components['restore cloud'].add_time((time,t-time))
+    # center particle back and forth, look with LDM, LSU and sometimes also OOS
+    t = components['CMS scan -x [1]'].add_time((t,3))
+    t = components['CMS scan +x [1]'].add_time((t,6))
+    t = components['CMS scan -x [1]'].add_time((t,3))
     return t
 
 def scan_cloud(time):
-    t = time
-    # center particle back and forth, look with LDM, LSU and sometimes also OOS
-    t = components['CMS scan +x 1mm/s'].add_time((t,3))
-    t = components['CMS scan -x 1mm/s'].add_time((t,6))
-    t = components['CMS scan +x 1mm/s'].add_time((t,3))
-#    LDM_highspeed(time,t-time)
-#    t = LDM_readout(t, t-time)
-    OOSLDM_mixed_mode(time, t-time)
-    return t
-def scan(time):
-    t = time
-    t = scan_cloud(t)
+    t = scan(time)
+    components['Scan cloud'].add_time((time,t-time))
     return t
 
-def loop_brown(time, add_readout=0):
+def scan_agglomerate(time):
+    t = position_particle(time)
+    t_scan = t
+    t = scan(t)
+    components['Scan agglomerate'].add_time((t_scan, t-t_scan))
+    t = restore_cloud(t)
+    return t
+
+def loop_brown(time):
     # observe 10s
     t = time
-    if add_readout != 0:
-        t = LDM_readout(t, add_readout)
 
     t_start_levitate = t
-    t = OOSLDM_mixed_mode(t,5) # observe unperturbed, but levitate
+    t = components['CMS levitate'].add_time((t, 10))
     # t = adjust_CMS(t)
     t = scan_cloud(t)
-
-    components['CMS levitate'].add_time((time,t-t_start_levitate))
-
-    t = LDM_highspeed(t,1) # observe unperturbed 1s
-    t = LDM_readout(t, 4)
-    # print("        Brown from {} to {}".format(time, t))
-
     return t
 
 def largest_particle(time):
     t = time
-    t = adjust_CMS(t)    # 2s
     t = position_particle(t) # 3s
     scan_t = t
-    t = scan(t) # 12s
-    components['scan particle'].add_time((scan_t,t-scan_t))
+    t = scan_agglomerate(t)
+    components['Scan agglomerate'].add_time((scan_t, t-scan_t))
     t = restore_cloud(t) # 3
     print("{:6.1f}: Largest particle finished in {:4.1f}s.".format(t,t-time))
     return t
 
 def scan_e(time): # initial scan of the cloud
     t = time
-    t = components['CMS E +x'].add_time((t, 0.5))
-    t = components['CMS E -x'].add_time((t, 0.5))
-    t = components['CMS E +y'].add_time((t, 0.5))
-    t = components['CMS E -y'].add_time((t, 0.5))
     t = components['CMS E +z'].add_time((t, 0.5))
     t = components['CMS E -z'].add_time((t, 0.5))
-    LDM_highspeed(time, t-time)
     print("        Charge scan particle: {:4.1f}".format(t-time))
     return t
 
 def loop_agglomerate(time):
     t = time
     # electric measurement
-    t = components['CMS E +x'].add_time((t,2))
-    t = components['CMS E -x'].add_time((t,4))
-    t = components['CMS E +x'].add_time((t,2))
-    OOSLDM_mixed_mode(time,t-time)
+    t = components['CMS E +z'].add_time((t,2))
+    t = components['CMS E -z'].add_time((t,4))
+    t = components['CMS E +z'].add_time((t,2))
     # squeezing
-    components['CMS squeeze'].add_time((t, 15))
-    t = OOSLDM_mixed_mode(t,15)
+    t = components['CMS squeeze'].add_time((t, 15))
     # scan
-    t = scan(t)
+    t = scan_cloud(t)
     components['Forced agglom.'].add_time((time,t-time))
     print("        Loop agglomerate: {:4.1f}".format(t-time))
     return t
@@ -268,7 +205,6 @@ def phase_injection(time):
     components['open shutter valve'].add_time((0,5))
 
     t = components['analyse injection'].add_time((5,20))
-    OOSLDM_mixed_mode(-1,t+1)
 #
 #    # possible re-injection
     components['open shutter valve'].add_time((15,5))
@@ -280,7 +216,7 @@ def phase_brown(time, duration=brown_time):
     # brownian motion first, Phase I
     # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
     t0 = time
-    t = loop_brown(t0, add_readout=3)
+    t = loop_brown(t0)
     loop_duration = t - t0
     n_loops, t_remain = divmod(duration, loop_duration)
     n_loops = int(n_loops)
@@ -342,6 +278,7 @@ for loop in range(0,4):
 #
 #
 fig, ax = plt.subplots()
+plt.setp(ax, zorder=0)
 ##ax.broken_barh([(110, 30), (150, 10)], (10, 9), facecolors='blue')
 ##ax.broken_barh([(10, 50), (100, 20), (130, 10)], (20, 9),
 #               #facecolors=('red', 'yellow', 'green'))
@@ -361,37 +298,45 @@ with open('/home/ingo/idltools/icaps_test.txt', 'w') as thefile:
 ax.set_yticklabels(components)
 
 ax.set_ylim(0, max(ticks)+1)
-ax.set_xlim(-100, 600)
+ax.set_xlim(tmin, tmax)
 ax.set_xlabel('seconds since start of micro-g')
 #
 ax.set_yticks(ticks)
 ax.grid(True)
 
+ymax = len(components)
+
 # Annotate 2nd injection
 ax.annotate('optional 2nd,\ninjection',
-                  xy=(17, 26), xycoords='data',
-                  xytext=(50, 26), textcoords='data',
+                  xy=(17, ymax-2), xycoords='data',
+                  xytext=(50, ymax-2), textcoords='data',
                   size=8,
                   arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
-ax.annotate('end of µg', xy=(440, 43), xytext=(447, 45.5), textcoords='data', fontsize=8,
-            horizontalalignment='center')
+
+ax.annotate('end of µg', (end_mug, ymax-2), xycoords='data',
+            xytext=(end_mug+20,ymax-2), textcoords='data',
+            size=8,
+            arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
+
+#ax.annotate('end of µg', xy=(end_mug+20, ymax-2), xytext=(end_mug+20, ymax-2), textcoords='data', fontsize=8,
+#            horizontalalignment='center')
 
 
 # Annotate scan for charges
-rect = Rectangle((scan_e_time-10,11),20,6,fill=False,color='black',linewidth=1.5,linestyle='-')
+rect = Rectangle((scan_e_time-10,8),20,2,fill=False,color='black',linewidth=1.5,linestyle='-')
 #rect = Rectangle((0.5,0.5),0.1,0.1,fill=True,color='black',linewidth=5,linestyle='-',figure=ax)
 ax.add_patch(rect)
-ax.annotate('short scan for charge\n0.5s each direction', (scan_e_time+10, 12), xycoords='data',
-            xytext=(scan_e_time+25, 11.5), textcoords='data',
+ax.annotate('short scan for charge\n0.5s each direction', (scan_e_time+10, 9), xycoords='data',
+            xytext=(scan_e_time+25, 9), textcoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
 
 # annotate different phases
-ax.annotate('Brownian phase', (start_brown+(start_agglomerate - start_brown) / 2, 28), textcoords='data',
+ax.annotate('Brownian phase', (start_brown+(start_agglomerate - start_brown) / 2, ymax), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('Agglomeration phase', (start_agglomerate+(end_agglomerate - start_agglomerate) / 2, 28), textcoords='data',
+ax.annotate('Agglomeration phase', (start_agglomerate+(end_agglomerate - start_agglomerate) / 2, ymax), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('Scan', (end_agglomerate+(end_mug - end_agglomerate) / 2, 28), textcoords='data',
+ax.annotate('Scan', (end_agglomerate+(end_mug - end_agglomerate) / 2, ymax), textcoords='data',
             size=10, horizontalalignment='center')
 
 # indicate exact times
@@ -402,33 +347,38 @@ plt.axvline(x=end_agglomerate, ymin=0, ymax = uppery, linewidth=1, color='k', li
 # annotate end of µg
 plt.axvline(x=end_mug, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
 
-ax.annotate('{:3.0f}s'.format(start_brown), (start_brown+5, 28), textcoords='data',
+ax.annotate('{:3.0f}s'.format(start_brown), (start_brown+5, ymax), textcoords='data',
             size=10, horizontalalignment='left')
-ax.annotate('{:3.0f}s'.format(start_agglomerate), (start_agglomerate, 28), textcoords='data',
+ax.annotate('{:3.0f}s'.format(start_agglomerate), (start_agglomerate, ymax), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('{:3.0f}s'.format(end_agglomerate), (end_agglomerate, 28), textcoords='data',
+ax.annotate('{:3.0f}s'.format(end_agglomerate), (end_agglomerate, ymax), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('{:3.0f}s'.format(end_mug), (end_mug, 28), textcoords='data',
+ax.annotate('{:3.0f}s'.format(end_mug), (end_mug, ymax), textcoords='data',
             size=10, horizontalalignment='center')
 
-ax.annotate('end of µg', (end_mug, 26), xycoords='data',
-            xytext=(470,26), textcoords='data',
-            size=8,
-            arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
+# Annotate scan for charges
+rect2 = Rectangle((tmin+25,0.2),150,1.5,
+                  fill=True, alpha=1, zorder=1,
+                  facecolor='white',linewidth=1.5,linestyle='-',edgecolor='black')
+
+# Annotate the 1st position with a text box ('Test 1')
+text_scandir = TextArea("[1] CMS scan must be (mostly) in\n the viewing direction of the LDM", minimumdescent=False)
+ab = AnnotationBbox(text_scandir, (tmin+30, 2.7),
+                    xybox=(0, 1), # center of text box in data coordinates
+                    xycoords='data',
+                    boxcoords="data"
+                    )
+ax.add_artist(ab)
 
 
+text_scandir = TextArea("Note:\nSequence assumes that\n the LDM camera cannot\n see the OOS light and\n vice versa (e.g. that\n colour filters are used)", minimumdescent=False)
+ab2 = AnnotationBbox(text_scandir, (422, 1),
+                    xybox=(417, 1.5), # center of text box in data coordinates
+                    xycoords='data',
+                    boxcoords="data"
+                    )
+ax.add_artist(ab2)
 
-#
-#
-##ax.annotate('Phase I', (50,36), xytext=((22+24*7)/2,37), textcoords='data',
-#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-##ax.annotate('Phase II', (50,36), xytext=(22+24*7+20,37), textcoords='data',
-#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-##ax.annotate('Phase III', (50,36), xytext=(42+24*7+36*3+20,37), textcoords='data',
-#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-##ax.annotate('Phase IV', (50,36), xytext=(42+24*7+36*7+20,37), textcoords='data',
-#            #fontsize=8, horizontalalignment='center', verticalalignment='top')
-##ax.annotate('Brownian motion', (
-#
+
 plt.subplots_adjust(left=0.15)
 plt.show()
