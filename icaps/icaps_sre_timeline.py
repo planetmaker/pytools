@@ -384,9 +384,9 @@ rect2 = Rectangle((tmin+25,0.2),150,1.5,
                   facecolor='white',linewidth=1.5,linestyle='-',edgecolor='black')
 
 # Annotate the 1st position with a text box ('Test 1')
-text_scandir = TextArea("[1] CMS scan must be (mostly) in\n the viewing direction of the LDM", minimumdescent=False)
+text_scandir = TextArea("Adjust such that agglomerates are scanned\nin the viewing direction of the LDM", minimumdescent=False)
 ab = AnnotationBbox(text_scandir, (tmin+30, 2.7),
-                    xybox=(0, 1), # center of text box in data coordinates
+                    xybox=(5, 6.5), # center of text box in data coordinates
                     xycoords='data',
                     boxcoords="data"
                     )
@@ -395,7 +395,7 @@ ax.add_artist(ab)
 
 text_scandir = TextArea("Note:\nSequence assumes that\n the LDM camera cannot\n see the OOS light and\n vice versa (e.g. that\n colour filters are used)", minimumdescent=False)
 ab2 = AnnotationBbox(text_scandir, (422, 1),
-                    xybox=(417, 1.5), # center of text box in data coordinates
+                    xybox=(417, 1.7), # center of text box in data coordinates
                     xycoords='data',
                     boxcoords="data"
                     )
