@@ -201,14 +201,26 @@ def phase_injection(time):
     t = time
     # First 22 seconds are injection. That's directly defined above in the item definitions
     components['cogwheel'].add_time((-30,60))
-    components['injection piston'].add_time((-1,6))
-    components['open shutter valve'].add_time((0,5))
 
-    t = components['analyse injection'].add_time((5,20))
-#
+    relaxation_time = 7.5
+
+    # First injection
+    t = components['injection piston'].add_time((-1,6))
+    components['open shutter valve'].add_time((0,5))
+    t_end_injection1 = t
+    t = components['analyse injection'].add_time((t_end_injection1,relaxation_time))
+    components['measure cloud v'].add_time((t_end_injection1,relaxation_time-2))
+    scan_e(t_end_injection1+relaxation_time-1)
+    #total_time = scan_e(total_time)
+
 #    # possible re-injection
-    components['open shutter valve'].add_time((15,5))
-    components['injection piston'].add_time((14,6))
+    components['injection piston'].add_time((t,6))
+    t = components['open shutter valve'].add_time((t+1,5))
+    t_end_injection2 = t
+    t = components['analyse injection'].add_time((t_end_injection2,relaxation_time))
+    components['measure cloud v'].add_time((t_end_injection2,relaxation_time-2))
+    scan_e(t_end_injection2+relaxation_time-1)
+
     print("{:6.1f}: Injection finished".format(t))
     return t
 #
@@ -250,8 +262,8 @@ def phase_agglomerate(time, duration=agglomeration_time):
 total_time = phase_injection(0)
 injection_time = total_time
 
-# Do some initial measurements on the freshly-injected particles
-total_time = scan_e(total_time)
+# Do some initial measurements on the freshly-injected particles (part of injection)
+#total_time = scan_e(total_time)
 scan_e_time = total_time
 
 # Brownian growth
@@ -323,10 +335,10 @@ ax.annotate('end of µg', (end_mug, ymax-2), xycoords='data',
 
 
 # Annotate scan for charges
-rect = Rectangle((scan_e_time-10,8),20,2,fill=False,color='black',linewidth=1.5,linestyle='-')
+rect = Rectangle((7.5,8),scan_e_time+2,2,fill=False,color='black',linewidth=1.5,linestyle='-')
 #rect = Rectangle((0.5,0.5),0.1,0.1,fill=True,color='black',linewidth=5,linestyle='-',figure=ax)
 ax.add_patch(rect)
-ax.annotate('short scan for charge\n0.5s each direction', (scan_e_time+10, 9), xycoords='data',
+ax.annotate('short scan for charge\n0.5s each direction\nafter injection(s)', (scan_e_time+10, 9), xycoords='data',
             xytext=(scan_e_time+25, 9), textcoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
