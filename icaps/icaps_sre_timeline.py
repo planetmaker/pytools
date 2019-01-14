@@ -94,8 +94,10 @@ add_component('measure cloud v',    'blueviolet')
 
 add_component('CMS levitate',       'slateblue')
 add_component('CMS squeeze',        'slateblue')
-add_component('CMS scan -x [1]',        'skyblue')
-add_component('CMS scan +x [1]',        'deepskyblue')
+add_component('CMS scan -x',        'skyblue')
+add_component('CMS scan +x',        'deepskyblue')
+add_component('CMS scan -z',        'skyblue')
+add_component('CMS scan +z',        'deepskyblue')
 
 add_component('CMS E -z',           'steelblue')
 add_component('CMS E +z',           'dodgerblue')
@@ -130,12 +132,12 @@ def restore_cloud(time, duration=1):
     t = components['restore cloud'].add_time((time,duration))
     return t
 
-def scan(time):
+def scan(time, direction='z'):
     t = time
     # center particle back and forth, look with LDM, LSU and sometimes also OOS
-    t = components['CMS scan -x [1]'].add_time((t,3))
-    t = components['CMS scan +x [1]'].add_time((t,6))
-    t = components['CMS scan -x [1]'].add_time((t,3))
+    t = components['CMS scan -' + direction].add_time((t,3))
+    t = components['CMS scan +' + direction].add_time((t,6))
+    t = components['CMS scan -' + direction].add_time((t,3))
     return t
 
 def scan_cloud(time):
@@ -147,6 +149,7 @@ def scan_agglomerate(time):
     t = position_particle(time)
     t_scan = t
     t = scan(t)
+    scan(t_scan, direction='x')
     components['Scan agglomerate'].add_time((t_scan, t-t_scan))
     t = restore_cloud(t)
     return t
@@ -335,11 +338,12 @@ ax.annotate('end of µg', (end_mug, ymax-2), xycoords='data',
 
 
 # Annotate scan for charges
-rect = Rectangle((7.5,8),scan_e_time+2,2,fill=False,color='black',linewidth=1.5,linestyle='-')
+ycharge = 10
+rect = Rectangle((7.5,ycharge),scan_e_time+2,2,fill=False,color='black',linewidth=1.5,linestyle='-')
 #rect = Rectangle((0.5,0.5),0.1,0.1,fill=True,color='black',linewidth=5,linestyle='-',figure=ax)
 ax.add_patch(rect)
-ax.annotate('short scan for charge\n0.5s each direction\nafter injection(s)', (scan_e_time+10, 9), xycoords='data',
-            xytext=(scan_e_time+25, 9), textcoords='data',
+ax.annotate('short scan for charge\n0.5s each direction\nafter injection(s)', (scan_e_time+10, ycharge), xycoords='data',
+            xytext=(scan_e_time+25, ycharge), textcoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
 
