@@ -2,9 +2,6 @@
 """
 Make the ICAPS timeline
 
-TODO:
-    * LDM light off when OOS light is on
-    * OOS illumination must be on during CMS scan +- 1mm
 """
 import matplotlib.pyplot as plt
 # from matplotlib.patches import Ellipse
