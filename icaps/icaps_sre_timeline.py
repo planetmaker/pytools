@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.offsetbox import (TextArea, AnnotationBbox)
 
+import pandas as pd
+
 components = {}
 
 end_mug = 375 # seconds
@@ -261,10 +263,35 @@ def phase_agglomerate(time, duration=agglomeration_time):
 
     print("{:6.1f}: Forced agglomeration finished.".format(t))
     return t
-#
-#
-#
-#
+
+def convert_to_timeline(components):
+    times_set = set()
+    for item in components:
+        for interval in components.get(item).dutycycle:
+            times_set.add(interval[0])
+            times_set.add(interval[0] + interval[1])
+    times = list(times_set)
+    times.sort()
+
+    timeline = dict()
+    timeline['time since µg'] = times
+    for item in components:
+        this_tl = ['' for x in times]
+        for interval in components.get(item).dutycycle:
+            t0 = times.index(interval[0])
+            t1 = times.index(interval[0] + interval[1])
+            this_tl[t0] = 'on'
+            this_tl[t1] = 'off'
+            timeline[item] = this_tl
+
+def write_to_excel(timeline):
+    pd_timeline = pd.DataFrame.from_dict(timeline)
+    writer = pd.ExcelWriter('icaps_timeline.xlsx')
+    pd_timeline.to_excel(writer, sheet_name='Timeline')
+    writer.save()
+
+
+
 total_time = phase_injection(0)
 injection_time = total_time
 
@@ -303,7 +330,7 @@ plt.setp(ax, zorder=0)
 ## [(xstart, duration)], (ystart, height), facecolors=('color')
 ticks = [0] * len(components)
 #
-with open('/home/ingo/idltools/icaps_test.txt', 'w') as thefile:
+with open('icaps_timeline.txt', 'w') as thefile:
     for index, item in enumerate(components, start = 1):
         dutycycle = components.get(item).dutycycle
         color = components.get(item).color
@@ -312,6 +339,9 @@ with open('/home/ingo/idltools/icaps_test.txt', 'w') as thefile:
         thefile.write("%s: " % item)
         thefile.write("%s\n" % dutycycle)
     thefile.close()
+
+timeline = convert_to_timeline(components)
+write_to_excel(timeline)
 #
 ax.set_yticklabels(components)
 
