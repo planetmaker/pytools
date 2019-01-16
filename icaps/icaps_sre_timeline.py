@@ -290,6 +290,8 @@ def convert_to_timeline(components):
             this_tl[t1] = 'off'
             timeline[item] = this_tl
 
+    return timeline
+
 def write_to_excel(timeline):
     pd_timeline = pd.DataFrame.from_dict(timeline)
     writer = pd.ExcelWriter('icaps_timeline.xlsx')
