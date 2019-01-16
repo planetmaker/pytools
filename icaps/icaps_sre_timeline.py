@@ -106,11 +106,11 @@ add_component('Scan agglomerate',   'palevioletred')
 add_component('Forced agglom.',     'lightpink')
 add_component('Brownian motion',    'lightpink')
 
-add_component('LDM illumination',   'yellow',      timeslot=(-5,600))
-add_component('OOS illumination',   'peru',        timeslot=(-5,600))
+add_component('LDM illumination',   'yellow',      timeslot=(-5,tmax))
+add_component('OOS illumination',   'peru',        timeslot=(-5,tmax))
 
-add_component('LDM camera',         'olivedrab',   timeslot=(-5,600))
-add_component('OOS camera',         'yellowgreen', timeslot=(-5,600))
+add_component('LDM camera',         'olivedrab',   timeslot=(-5,tmax))
+add_component('OOS camera',         'yellowgreen', timeslot=(-5,tmax))
 
 add_component('analyse injection',  'lightgrey')
 add_component('open shutter valve', 'dimgray')
@@ -264,6 +264,12 @@ def phase_agglomerate(time, duration=agglomeration_time):
     print("{:6.1f}: Forced agglomeration finished.".format(t))
     return t
 
+def phase_post_mug(time):
+    t = loop_agglomerate(time)
+    t = scan_agglomerate(t)
+    return t
+
+
 def convert_to_timeline(components):
     times_set = set()
     for item in components:
@@ -318,9 +324,7 @@ for loop in range(0,3):
     total_time = largest_particle(total_time)
 
 # continue until end: Phase V
-for loop in range(0,4):
-    total_time = loop_agglomerate(total_time)
-#
+total_time = phase_post_mug(total_time)
 #
 fig, ax = plt.subplots()
 plt.setp(ax, zorder=0)
