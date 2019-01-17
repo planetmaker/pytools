@@ -292,6 +292,24 @@ def convert_to_timeline(components):
 
     return timeline
 
+def convert_pdframe_to_dict(pdframe):
+    timeline = dict()
+    for item in pdframe:
+        this_list = list()
+        times = pdframe[(pdframe[item] == 'on') | (pdframe[item] == 'off')]['time since µg']
+        values = pdframe[(pdframe[item] == 'on') | (pdframe[item] == 'off')][item]
+        for index, starttime in enumerate(times):
+            if values[index] == 'on' and values[index+1] == 'off':
+                this_list.append((starttime, times[index+1]-starttime))
+        timeline[item] = this_list
+
+    return timeline
+
+def read_from_excel(filename='icaps_timeline.xlsx'):
+    timeline = dict()
+    pd_timeline = pd.read_excel(filename)
+    return timeline
+
 def write_to_excel(timeline):
     pd_timeline = pd.DataFrame.from_dict(timeline)
     writer = pd.ExcelWriter('icaps_timeline.xlsx')
