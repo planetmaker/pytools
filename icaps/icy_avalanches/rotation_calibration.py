@@ -24,9 +24,9 @@ print(r_values)
 # Calculate omega for all relevant radii and g levels. Output it as table
 print("g: [rpm (13cm), rpm (14cm),..., rpm (18cm)]")
 for a in a_values:
-    omega = r_values
-    f = omega
-    rpm = omega
+    omega = r_values.copy()
+    f = omega.copy()
+    rpm = omega.copy()
     for i,r in enumerate(r_values):
         omega[i] = sqrt(a / (r / 100))
         f[i] = omega[i] / 2 / pi
@@ -36,3 +36,21 @@ for a in a_values:
     
 # Convert the rpm values to voltage as by the centrifuge calibration data
 
+
+# Übersetzung 60:40, Kalibrationskurve:
+# rpm = -2.10924 + 9.9258 * U
+
+def u_for_rpm(rpm):
+    u = (rpm + 2.10924) / 9.9258
+    return u
+
+
+needed_rpm = {0.3: 42, 0.1: 24, 0.03: 13, 0.01: 7.5, 0.003: 4.2, 0.001: 2.4}
+data_set = dict()
+for item, value in needed_rpm.items():
+    data_set[item] = {'rpm': value}
+    data_set[item]['U'] = u_for_rpm(value)
+    
+print(data_set)
+
+    
