@@ -82,6 +82,48 @@ drops = {
                 't_spin': [1900*f_logging,1940*f_logging],
                 't_0g': [1951*f_logging,1954*f_logging],
                 },
+        'drop11': {
+                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop11/acc-data/drop11.txt',
+                't_pre_spin': [2550*f_logging,2600*f_logging],
+                't_spin': [2610*f_logging,2660*f_logging],
+                't_0g': [2663*f_logging,2666*f_logging],
+                },
+#        'drop12': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop12/acc-data/drop12.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
+#        'drop13': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop13/acc-data/drop13.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
+#        'drop14': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop14/acc-data/drop14.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
+#        'drop15': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop15/acc-data/drop15.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
+#        'drop16': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop16/acc-data/drop16.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
+#        'drop17': {
+#                'acc_filename': '/home/planetmaker/Bilder/dtc_201902/drop17/acc-data/drop17.txt',
+#                't_pre_spin': [1840*f_logging,1880*f_logging],
+#                't_spin': [1900*f_logging,1940*f_logging],
+#                't_0g': [1951*f_logging,1954*f_logging],
+#                },
         }
 
 
