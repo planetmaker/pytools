@@ -21,6 +21,14 @@ def calibrate_axis(timeline, minus_start, minus_end, null_start, null_end, plus_
     
     return (minus, null, plus)
 
+def suggest_calibration_axis(timeline, minus_start, minus_end, null_start, null_end, plus_start, plus_end):
+    minnullplus = calibrate_axis(timeline, minus_start, minus_end, null_start, null_end, plus_start, plus_end)
+    
+    print(minnullplus[2][0]+minnullplus[0][0], minnullplus[1][0])
+    
+    return minnullplus
+    
+
 def read_sensor_file(filename):
     sensor_arr = pd.read_csv(filename, sep='\t', header=2, decimal=',', names=['x','y','z'])
     return sensor_arr
@@ -44,22 +52,36 @@ t_x_minus = [89*f_logging, 95*f_logging]
 print('Calibration data:')
 cal_data = read_sensor_file(cal_filename)
 
+print('x: ',calibrate_axis(cal_data['x'], t_x_minus[0], t_x_minus[1], t_z_plus[0],  t_z_plus[1],  t_x_plus[0], t_x_plus[1]))
+print('y: ',calibrate_axis(cal_data['y'], t_y_minus[0], t_y_minus[1], t_z_plus[0],  t_z_plus[1],  t_y_plus[0], t_y_plus[1]))
 print('z: ',calibrate_axis(cal_data['z'], t_z_minus[0], t_z_minus[1], t_y_minus[0], t_y_minus[1], t_z_plus[0], t_z_plus[1]))
 
 
 
 # drop07
-#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop07/acc_drop07.txt'
-#t_pre_spin = [1500*f_logging,1575*f_logging]
-#t_spin = [1600*f_logging,1675*f_logging]
-#t_0g   = [1693*f_logging,1695*f_logging]
+acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop07/acc_drop07.txt'
+t_pre_spin = [1500*f_logging,1575*f_logging]
+t_spin = [1600*f_logging,1675*f_logging]
+t_0g   = [1693*f_logging,1695*f_logging]
 
 # drop08
-acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop08/acc-data/drop08.txt'
-t_pre_spin = [1485*f_logging,1510*f_logging]
-t_spin = [1540*f_logging,1552*f_logging]
-t_0g   = [1557*f_logging,1559*f_logging]
+#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop08/acc-data/drop08.txt'
+#t_pre_spin = [1485*f_logging,1510*f_logging]
+#t_spin = [1540*f_logging,1552*f_logging]
+#t_0g   = [1557*f_logging,1559*f_logging]
 
+# drop09
+#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop09/acc-data/drop09.txt'
+#t_pre_spin = [1720*f_logging,1820*f_logging]
+#t_spin = [1840*f_logging,1880*f_logging]
+#t_0g   = [1892*f_logging,1894*f_logging]
+
+# drop10
+#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop10/acc-data/drop10.txt'
+#t_pre_spin = [1840*f_logging,1880*f_logging]
+#t_spin = [1900*f_logging,1940*f_logging]
+#t_0g   = [1951*f_logging,1954*f_logging]
+#
 acc_data = read_sensor_file(acc_filename)
 
 
@@ -67,6 +89,7 @@ time = [t/400 for t in range(0,len(acc_data['x']))]
 
 # Create plots with pre-defined labels.
 fig, ax = plt.subplots()
+plt.gcf().canvas.set_window_title(acc_filename)
 ax.plot(time, acc_data['x'], 'k--', label='x')
 ax.plot(time, acc_data['y'], 'b:', label='y')
 ax.plot(time, acc_data['z'], 'r', label='z')
@@ -75,6 +98,8 @@ smooth_x = smooth(acc_data['x'],50)
 smooth_y = smooth(acc_data['y'],50)
 smooth_z = smooth(acc_data['z'],50)
 
+print('\n')
+print(acc_filename)
 print('Values for 1g:')
 prespin = acc_data[:][t_pre_spin[0]:t_pre_spin[1]]
 print('x = {} +- {}'.format(np.mean(prespin['x']),np.std(prespin['x'])))
