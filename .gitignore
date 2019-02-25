@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Generated files
+icaps/icaps_timeline.txt
+icaps/icaps_timeline.xlsx
+
