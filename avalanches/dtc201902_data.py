@@ -50,42 +50,48 @@ drops = {
                 't_spin': [2610*calibration.get('f_logging'),2660*calibration.get('f_logging')],
                 't_0g': [2663*calibration.get('f_logging'),2666*calibration.get('f_logging')],
                 },
-#        'drop12': {
-#                'acc_filename': 'drop12/acc-data/drop12.txt',
+        'drop12': {
+                'acc_filename': 'drop12/acc-data/drop12.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
-#        'drop13': {
-#                'acc_filename': 'drop13/acc-data/drop13.txt',
+                },
+        'drop13': {
+                'acc_filename': 'drop13/acc-data/drop13.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
-#        'drop14': {
-#                'acc_filename': 'drop14/acc-data/drop14.txt',
+                },
+        'drop14': {
+                'acc_filename': 'drop14/acc-data/drop14.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
-#        'drop15': {
-#                'acc_filename': 'drop15/acc-data/drop15.txt',
+                },
+        'drop15': {
+                'acc_filename': 'drop15/acc-data/drop15.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
-#        'drop16': {
-#                'acc_filename': 'drop16/acc-data/drop16.txt',
+                },
+        'drop16': {
+                'acc_filename': 'drop16/acc-data/drop16.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
-#        'drop17': {
-#                'acc_filename': 'drop17/acc-data/drop17.txt',
+                },
+        'drop17': {
+                'acc_filename': 'drop17/acc-data/drop17.txt',
 #                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
 #                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
 #                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
-#                },
+                },
+        'drop18': {
+                'acc_filename': 'drop18/acc-data/drop18.txt',
+#                't_pre_spin': [1840*calibration.get('f_logging'),1880*calibration.get('f_logging')],
+#                't_spin': [1900*calibration.get('f_logging'),1940*calibration.get('f_logging')],
+#                't_0g': [1951*calibration.get('f_logging'),1954*calibration.get('f_logging')],
+                },
         }
 
 def get_calibration():

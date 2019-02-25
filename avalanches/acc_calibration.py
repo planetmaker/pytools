@@ -89,7 +89,7 @@ for drop, values in drops.items():
 
     # Create plots with pre-defined labels.
     fig, ax = plt.subplots()
-    plt.gcf().canvas.set_window_title(acc_filename)
+    plt.gcf().canvas.set_window_title(drop + 'acc-data')
     ax.plot(time, acc_data['x'], 'k--', label='x')
     ax.plot(time, acc_data['y'], 'b:', label='y')
     ax.plot(time, acc_data['z'], 'r', label='z')
@@ -99,24 +99,27 @@ for drop, values in drops.items():
     smooth_z = smooth(acc_data['z'],50)
 
     print('\n')
-    print(acc_filename)
-    print('Values for 1g:')
-    prespin = acc_data[:][t_pre_spin[0]:t_pre_spin[1]]
-    print('x = {} +- {}'.format(np.mean(prespin['x']),np.std(prespin['x'])))
-    print('y = {} +- {}'.format(np.mean(prespin['y']),np.std(prespin['y'])))
-    print('z = {} +- {}'.format(np.mean(prespin['z']),np.std(prespin['z'])))
+    print(drop)
+    try:
+        print('Values for 1g:')
+        prespin = acc_data[:][t_pre_spin[0]:t_pre_spin[1]]
+        print('x = {} +- {}'.format(np.mean(prespin['x']),np.std(prespin['x'])))
+        print('y = {} +- {}'.format(np.mean(prespin['y']),np.std(prespin['y'])))
+        print('z = {} +- {}'.format(np.mean(prespin['z']),np.std(prespin['z'])))
 
-    print('Values for 1g with centrifuge:')
-    spin = acc_data[:][t_spin[0]:t_spin[1]]
-    print('x = {} +- {} ({}..{})'.format(np.mean(spin['x']),np.std(spin['x']), np.min(smooth_x), np.max(smooth_x)))
-    print('y = {} +- {} ({}..{})'.format(np.mean(spin['y']),np.std(spin['y']), np.min(smooth_y), np.max(smooth_y)))
-    print('z = {} +- {} ({}..{})'.format(np.mean(spin['z']),np.std(spin['z']), np.min(smooth_z), np.max(smooth_z)))
+        print('Values for 1g with centrifuge:')
+        spin = acc_data[:][t_spin[0]:t_spin[1]]
+        print('x = {} +- {} ({}..{})'.format(np.mean(spin['x']),np.std(spin['x']), np.min(smooth_x), np.max(smooth_x)))
+        print('y = {} +- {} ({}..{})'.format(np.mean(spin['y']),np.std(spin['y']), np.min(smooth_y), np.max(smooth_y)))
+        print('z = {} +- {} ({}..{})'.format(np.mean(spin['z']),np.std(spin['z']), np.min(smooth_z), np.max(smooth_z)))
 
-    print('Values for 0g:')
-    nullg = acc_data[:][t_0g[0]:t_0g[1]]
-    print('x = {} +- {}'.format(np.mean(nullg['x']),np.std(nullg['x'])))
-    print('y = {} +- {}'.format(np.mean(nullg['y']),np.std(nullg['y'])))
-    print('z = {} +- {}'.format(np.mean(nullg['z']),np.std(nullg['z'])))
+        print('Values for 0g:')
+        nullg = acc_data[:][t_0g[0]:t_0g[1]]
+        print('x = {} +- {}'.format(np.mean(nullg['x']),np.std(nullg['x'])))
+        print('y = {} +- {}'.format(np.mean(nullg['y']),np.std(nullg['y'])))
+        print('z = {} +- {}'.format(np.mean(nullg['z']),np.std(nullg['z'])))
+    except TypeError:
+        print('No value ranges defined!')
     legend = ax.legend(loc='upper left', shadow=False, fontsize='x-large')
 
     # Put a nicer background color on the legend.
