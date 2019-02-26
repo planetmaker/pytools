@@ -69,7 +69,18 @@ class dtc_acc_centrifuge():
         except TypeError:
             print("No on-centrifuge acceleration data available for {}".format(self.name))
         else:
+            # get the sample rate from the first line of the file
+            with open(acc_filename) as f:
+                line = f.readline()
+                self.sampling_rate = int(line.split()[1])
+            # read the rest of the file
             self.sensor_data = read_sensor_file(acc_filename)
+
+    def get_sampling_rate(self):
+        if self.sensor_data is None:
+            self.read()
+
+        return self.sampling_rate
 
     def get_axis(self, axis, smooth=1):
         if self.sensor_data is None:
