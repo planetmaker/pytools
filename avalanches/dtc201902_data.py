@@ -153,7 +153,7 @@ drops = {
                 },
         'drop12': {
                 'acc_filename': 'drop12/acc-data/drop12.txt',
-                'acc_position': AccPosition.ACC_POS_BEHIND,
+                'acc_position': AccPosition.ACC_POS_IN_FRONT,
                 't_pre_spin': [1000*calibration.get('f_logging'),1900*calibration.get('f_logging')],
                 't_spin': [2030*calibration.get('f_logging'),2050*calibration.get('f_logging')],
                 't_0g': [2053*calibration.get('f_logging'),2056*calibration.get('f_logging')],
@@ -164,7 +164,7 @@ drops = {
                 },
         'drop13': {
                 'acc_filename': 'drop13/acc-data/drop13.txt',
-                'acc_position': AccPosition.ACC_POS_BEHIND,
+                'acc_position': AccPosition.ACC_POS_IN_FRONT,
                 't_pre_spin': [1000*calibration.get('f_logging'),1700*calibration.get('f_logging')],
                 't_spin': [1875*calibration.get('f_logging'),1950*calibration.get('f_logging')],
                 't_0g': [1954*calibration.get('f_logging'),1957*calibration.get('f_logging')],
