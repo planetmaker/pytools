@@ -68,24 +68,40 @@ class dtc_acc_centrifuge():
             acc_filename = dtcdata.data_path + self.drop_data.get('acc_filename')
         except TypeError:
             print("No on-centrifuge acceleration data available for {}".format(self.name))
-            return
-
-        self.sensor_data = read_sensor_file(acc_filename)
+        else:
+            self.sensor_data = read_sensor_file(acc_filename)
 
     def get_axis(self, axis, smooth=1):
-        return self.sensor_data.get(axis)
-
-    def get_time(self):
-        return [t/self.sampling_rate for t in range(0, len(self.sensor_data['x']))]
-
-    def show(self):
         if self.sensor_data is None:
             self.read()
 
-        t_pre_spin = self.drop_data.get('t_pre_spin')
-        t_spin = self.drop_data.get('t_spin')
-        t_0g = self.drop_data.get('t_0g')
-        time = [t/400 for t in range(0,len(self.sensor_data['x']))]
+        try:
+            return self.sensor_data.get(axis)
+        except AttributeError:
+            print("No on-centrifuge acceleration data available for {}".format(self.name))
+
+    def get_time(self):
+        if self.sensor_data is None:
+            self.read()
+
+        try:
+            return [t/self.sampling_rate for t in range(0, len(self.sensor_data['x']))]
+        except AttributeError:
+            print("No on-centrifuge acceleration data available for {}".format(self.name))
+            return None
+
+    def plot(self):
+        if self.sensor_data is None:
+            self.read()
+
+        try:
+            t_pre_spin = self.drop_data.get('t_pre_spin')
+            t_spin = self.drop_data.get('t_spin')
+            t_0g = self.drop_data.get('t_0g')
+            time = [t/400 for t in range(0,len(self.sensor_data['x']))]
+        except AttributeError:
+            print("No on-centrifuge acceleration data available for {}".format(self.name))
+            return
 
         # Create plots with pre-defined labels.
         fig, ax = plt.subplots()
