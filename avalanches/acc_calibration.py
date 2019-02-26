@@ -52,33 +52,6 @@ print('y: ',calibrate_axis(cal_data['y'], t_y_minus[0], t_y_minus[1], t_z_plus[0
 print('z: ',calibrate_axis(cal_data['z'], t_z_minus[0], t_z_minus[1], t_y_minus[0], t_y_minus[1], t_z_plus[0], t_z_plus[1]))
 
 
-
-
-# drop07
-#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop07/acc_drop07.txt'
-#t_pre_spin = [1500*f_logging,1575*f_logging]
-#t_spin = [1600*f_logging,1675*f_logging]
-#t_0g   = [1693*f_logging,1695*f_logging]
-
-# drop08
-#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop08/acc-data/drop08.txt'
-#t_pre_spin = [1485*f_logging,1510*f_logging]
-#t_spin = [1540*f_logging,1552*f_logging]
-#t_0g   = [1557*f_logging,1559*f_logging]
-
-# drop09
-#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop09/acc-data/drop09.txt'
-#t_pre_spin = [1720*f_logging,1820*f_logging]
-#t_spin = [1840*f_logging,1880*f_logging]
-#t_0g   = [1892*f_logging,1894*f_logging]
-
-# drop10
-#acc_filename = '/home/planetmaker/Bilder/dtc_201902/drop10/acc-data/drop10.txt'
-#t_pre_spin = [1840*f_logging,1880*f_logging]
-#t_spin = [1900*f_logging,1940*f_logging]
-#t_0g   = [1951*f_logging,1954*f_logging]
-#
-
 for drop, values in dtcdata.drops.items():
     acc_filename = dtcdata.data_path + values.get('acc_filename')
     t_pre_spin = values.get('t_pre_spin')
