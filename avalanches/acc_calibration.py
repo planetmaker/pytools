@@ -9,10 +9,10 @@ Created on Mon Feb 18 22:37:22 2019
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from dtc201902_data import drops, data_path, get_calibration
+import dtc201902_data as dtcdata
 # from dtc201902_data import calibration as cal
 
-(cal_filename, f_logging, t_z_plus, t_z_minus, t_y_plus, t_y_minus, t_x_plus, t_x_minus) = get_calibration()
+(cal_filename, f_logging, t_z_plus, t_z_minus, t_y_plus, t_y_minus, t_x_plus, t_x_minus) = dtcdata.get_calibration()
 
 def calibrate_axis(timeline, minus_start, minus_end, null_start, null_end, plus_start, plus_end):
     minus_vec = timeline[minus_start:minus_end]
@@ -45,7 +45,7 @@ def smooth(y, box_pts):
 
 
 print('Calibration data:')
-cal_data = read_sensor_file(data_path + cal_filename)
+cal_data = read_sensor_file(dtcdata.data_path + cal_filename)
 
 print('x: ',calibrate_axis(cal_data['x'], t_x_minus[0], t_x_minus[1], t_z_plus[0],  t_z_plus[1],  t_x_plus[0], t_x_plus[1]))
 print('y: ',calibrate_axis(cal_data['y'], t_y_minus[0], t_y_minus[1], t_z_plus[0],  t_z_plus[1],  t_y_plus[0], t_y_plus[1]))
@@ -79,8 +79,8 @@ print('z: ',calibrate_axis(cal_data['z'], t_z_minus[0], t_z_minus[1], t_y_minus[
 #t_0g   = [1951*f_logging,1954*f_logging]
 #
 
-for drop, values in drops.items():
-    acc_filename = data_path + values.get('acc_filename')
+for drop, values in dtcdata.drops.items():
+    acc_filename = dtcdata.data_path + values.get('acc_filename')
     t_pre_spin = values.get('t_pre_spin')
     t_spin = values.get('t_spin')
     t_0g = values.get('t_0g')
