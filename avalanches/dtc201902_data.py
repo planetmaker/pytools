@@ -52,6 +52,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'rpm_video': 60/(1 * (954-120) / 500),
                 'fps': 500,
+                'avalanch_images': [641, 2440],
                 },
         'drop02': {
                 'temperature': -130,
@@ -59,6 +60,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
+                'avalanch_images': [670, 758],
                 },
         'drop03': {
                 'temperature': -116,
@@ -66,6 +68,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
+                'avalanch_images': [676, 763],
                 },
         'drop04': {
                 'temperature': -132,
@@ -74,6 +77,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'rpm_video': 60/(1 * (914-67) / 500),
+                'avalanch_images': [653, 2444],
                 },
         'drop05': {
                 'temperature': -120,
@@ -82,6 +86,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'rpm_video': 60/(1 * (1406-161) / 500),
+                'avalanch_images': [648, 2444],
                 },
         'drop06': {
                 'temperature': -96,
@@ -90,6 +95,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(2 * (2580-371) / 1000),
+                'avalanch_images': [1305, 4888],
                 },
         'drop07': {
                 'acc_filename': 'drop07/acc-data/acc_drop07.txt',
@@ -101,7 +107,9 @@ drops = {
                 'material': Material.SPHERES_50,
                 'target_g': 0.01,
                 'balance': CapsuleBalance.UNBALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(4 * (2105-242) / 1000),
+                'avalanch_images': [1292, 4888],
                 },
         'drop08': {
                 'acc_filename': 'drop08/acc-data/drop08.txt',
@@ -113,7 +121,9 @@ drops = {
                 'material': Material.SPHERES_50,
                 'target_g': 0.1,
                 'balance': CapsuleBalance.UNBALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(1 * (2710-200) / 1000),
+                'avalanch_images': [1283, 4881],
                 },
         'drop09': {
                 'acc_filename': 'drop09/acc-data/drop09.txt',
@@ -125,7 +135,9 @@ drops = {
                 'material': Material.SPHERES_50,
                 'target_g': 0.003,
                 'balance': CapsuleBalance.COUNTER_WEIGHT,
+                'fps': 1000,
                 'rpm_video': 60/(2 * (3914-733) / 1000),
+                'avalanch_images': [1296, 4877],
                 },
         'drop10': {
                 'acc_filename': 'drop10/acc-data/drop10.txt',
@@ -138,6 +150,8 @@ drops = {
                 'target_g': 0.001,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'rpm_video': 60/(4 * (4903-20) / 1000),
+                'fps': 1000,
+                'avalanch_images': [784, 4848],
                 },
         'drop11': {
                 'acc_filename': 'drop11/acc-data/drop11.txt',
@@ -149,7 +163,9 @@ drops = {
                 'material': Material.SPHERES_50,
                 'target_g': 0.01,
                 'balance': CapsuleBalance.FULLY_BALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(4 * (2497-582) / 1000),
+                'avalanch_images': [794, 4874],
                 },
         'drop12': {
                 'acc_filename': 'drop12/acc-data/drop12.txt',
@@ -161,6 +177,8 @@ drops = {
                 'material': Material.CRUSHED_10_16,
                 'target_g': 0.3,
                 'balance': CapsuleBalance.FULLY_BALANCED,
+                'fps': 1000,
+                'avalanch_images': [512, 616],
                 },
         'drop13': {
                 'acc_filename': 'drop13/acc-data/drop13.txt',
@@ -172,7 +190,9 @@ drops = {
                 'material': Material.CRUSHED_16_25,
                 'target_g': 0.01,
                 'balance': CapsuleBalance.FULLY_BALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(4 * (1944-73) / 1000),
+                'avalanch_images': [798, 4843],
                 },
         'drop14': {
                 'acc_filename': 'drop14/acc-data/drop14.txt',
@@ -185,6 +205,7 @@ drops = {
                 'target_g': 0.001,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 # 'rpm_video': Not possible. Too slow rotation and only one stringer visible
+                'avalanch_images': [790, 4863],
                 },
         'drop15': {
                 'acc_filename': 'drop15/acc-data/drop15.txt',
@@ -196,6 +217,7 @@ drops = {
                 'material': Material.CRUSHED_16_25,
                 'target_g': 0.03,
                 'balance': CapsuleBalance.FULLY_BALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(4 * (1553-403) / 1000),
                 },
         'drop16': {
@@ -209,6 +231,8 @@ drops = {
                 'target_g': 0.03,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'rpm_video': 60/(4 * (1624-479) / 1000),
+                'fps': 1000,
+                'avalanch_images': [852, 4855],
                 },
         'drop17': {
                 'acc_filename': 'drop17/acc-data/drop17.txt',
@@ -220,7 +244,9 @@ drops = {
                 'material': Material.CRUSHED_16_25,
                 'target_g': 0.003,
                 'balance': CapsuleBalance.FULLY_BALANCED,
+                'fps': 1000,
                 'rpm_video': 60/(4 * (3248-85) / 1000),
+                'avalanch_images': [798, 4843],
                 },
         'drop18': {
                 'acc_filename': 'drop18/acc-data/drop18.txt',
@@ -232,6 +258,8 @@ drops = {
                 'material': Material.CRUSHED_16_25,
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
+                'fps': 1000,
+                'avalanch_images': [1180, 1282],
                 },
         }
 
