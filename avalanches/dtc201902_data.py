@@ -53,6 +53,7 @@ drops = {
                 'rpm_video': 60/(1 * (954-120) / 500),
                 'fps': 500,
                 'avalanch_images': [641, 2440],
+                'manual_90angle': [(2435,[52.09, 51.37, 50.97, 52.59, 50.83])] # angle measured manually. Slope is 90-value
                 },
         'drop02': {
                 'temperature': -130,
@@ -61,6 +62,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'avalanch_images': [670, 758],
+                'manual_90angle': [(755,[54.05, 54.46, 54.64, 53.08])]
                 },
         'drop03': {
                 'temperature': -116,
@@ -69,6 +71,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'avalanch_images': [676, 763],
+                'manual_90angle': [(760,[56.37, 56.18, 53.40, 54.51, 54.76])]
                 },
         'drop04': {
                 'temperature': -132,
@@ -78,6 +81,7 @@ drops = {
                 'fps': 500,
                 'rpm_video': 60/(1 * (914-67) / 500),
                 'avalanch_images': [653, 2444],
+                'manual_90angle': [(2440,[53.67, 51.63, 51.70, 51.70])]
                 },
         'drop05': {
                 'temperature': -120,
@@ -87,6 +91,7 @@ drops = {
                 'fps': 500,
                 'rpm_video': 60/(1 * (1406-161) / 500),
                 'avalanch_images': [648, 2444],
+                'manual_90angle': [(2440,[55.60, 54.36, 54.61, 54.40])]
                 },
         'drop06': {
                 'temperature': -96,
@@ -96,6 +101,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(2 * (2580-371) / 1000),
                 'avalanch_images': [1305, 4888],
+                'manual_90angle': [(4880,[42.75, 44.74, 43.53, 43.65])]
                 },
         'drop07': {
                 'acc_filename': 'drop07/acc-data/acc_drop07.txt',
@@ -110,6 +116,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(4 * (2105-242) / 1000),
                 'avalanch_images': [1292, 4888],
+                'manual_90angle': [(4880,[53.55, 51.02, 50.06, 51.23])]
                 },
         'drop08': {
                 'acc_filename': 'drop08/acc-data/drop08.txt',
@@ -124,6 +131,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(1 * (2710-200) / 1000),
                 'avalanch_images': [1283, 4881],
+                'manual_90angle': [(4875,[56.36, 55.94, 57.00, 57.37])]
                 },
         'drop09': {
                 'acc_filename': 'drop09/acc-data/drop09.txt',
@@ -138,6 +146,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(2 * (3914-733) / 1000),
                 'avalanch_images': [1296, 4877],
+                'manual_90angle': [(4871,[52.35, 55.20, 50.85, 48.14, 53.90])]
                 },
         'drop10': {
                 'acc_filename': 'drop10/acc-data/drop10.txt',
@@ -152,6 +161,7 @@ drops = {
                 'rpm_video': 60/(4 * (4903-20) / 1000),
                 'fps': 1000,
                 'avalanch_images': [784, 4848],
+                'manual_90angle': [(4840,[1.26, 1.02, 0.34, 3.48, 1.18])]
                 },
         'drop11': {
                 'acc_filename': 'drop11/acc-data/drop11.txt',
@@ -166,6 +176,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(4 * (2497-582) / 1000),
                 'avalanch_images': [794, 4874],
+                'manual_90angle': [(4870,[62.59, 63.04, 62.12, 63.35])]
                 },
         'drop12': {
                 'acc_filename': 'drop12/acc-data/drop12.txt',
@@ -178,7 +189,8 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
-                'avalanch_images': [512, 616],
+                'avalanch_images': [1516, 1616],
+                'manual_90angle': [(1616,[61.36,56.38,59.88,59.28,59.73])]
                 },
         'drop13': {
                 'acc_filename': 'drop13/acc-data/drop13.txt',
@@ -193,6 +205,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(4 * (1944-73) / 1000),
                 'avalanch_images': [798, 4843],
+                'manual_90angle': [(4840,[56.70,60.57,60.72])]
                 },
         'drop14': {
                 'acc_filename': 'drop14/acc-data/drop14.txt',
@@ -205,7 +218,8 @@ drops = {
                 'target_g': 0.001,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 # 'rpm_video': Not possible. Too slow rotation and only one stringer visible
-                'avalanch_images': [790, 4863],
+                'avalanch_images': [790, 4831], # filename! ingame image# +32
+                'manual_90angle': [(4860,[3.45,1.72,2.62,2.79])] # the gravel has MUCH different slope
                 },
         'drop15': {
                 'acc_filename': 'drop15/acc-data/drop15.txt',
@@ -219,6 +233,7 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (1553-403) / 1000),
+                # 'avalanch_images': [] (did not open)
                 },
         'drop16': {
                 'acc_filename': 'drop16/acc-data/drop16.txt',
@@ -233,6 +248,7 @@ drops = {
                 'rpm_video': 60/(4 * (1624-479) / 1000),
                 'fps': 1000,
                 'avalanch_images': [852, 4855],
+                'manual_90angle': [(4849,[62.64,62.14,61.85,62.17,61.03,59.26,61.04,58.47])]
                 },
         'drop17': {
                 'acc_filename': 'drop17/acc-data/drop17.txt',
@@ -247,6 +263,7 @@ drops = {
                 'fps': 1000,
                 'rpm_video': 60/(4 * (3248-85) / 1000),
                 'avalanch_images': [798, 4843],
+                'manual_90angle': [(4840,[61.17,59.98,59.33,62.42])]
                 },
         'drop18': {
                 'acc_filename': 'drop18/acc-data/drop18.txt',
@@ -260,6 +277,7 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
                 'avalanch_images': [1180, 1282],
+                'manual_90angle': [(1280,[63.23,66.64,66.53,65.85])]
                 },
         }
 
