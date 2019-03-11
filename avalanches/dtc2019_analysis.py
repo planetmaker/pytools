@@ -11,18 +11,29 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from enum import Enum
+
+class AngleType(Enum):
+    MANUAL = 1
+
 import dtc201902_data as dtcdata
-
-
-def get_material(drops):
-    pass
-
 
 def get_drop_names():
     arr = []
     for item in dtcdata.drops:
         arr.append(item)
     return arr
+
+def set_filter(self, filter_arr):
+    self.filter = filter_arr
+
+def get_filtered(self, filter_arr):
+    try:
+        ret = self.dataset[filter_arr]
+    except KeyError:
+        print("Filtering failed. Length data: {} vs. length filter: {}".format(len(self.dataset), len(filter_arr)))
+        ret = self.dataset[self.dataset.name == 'None']
+    return ret
 
 def get_drop_property(property_name):
     arr = []
@@ -57,6 +68,12 @@ def get_manual_angle():
             stdarr.append(np.NaN)
     return arr, stdarr
 
+def get_angle(method = AngleType.MANUAL):
+    if method == AngleType.MANUAL:
+        return get_manual_angle()
+    return get_manual_angle()
+
+
 
 class dtc2019():
     def __init__(self):
@@ -67,6 +84,11 @@ class dtc2019():
         for prop in props:
             self.dataset[prop] = get_drop_property(prop)
         self.dataset['manual_angle'], self.dataset['stddev manual_angle'] = get_manual_angle()
+
+    def plot(self, x, y, **kwargs):
+        fig, ax = plt.subplots()
+        plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
+        ax.plot(self.dataset[x], self.dataset[y], 'k+', label=y, **kwargs)
 
 if __name__ == '__main__':
     pass
