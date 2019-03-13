@@ -24,17 +24,6 @@ def get_drop_names():
         arr.append(item)
     return arr
 
-def set_filter(self, filter_arr):
-    self.filter = filter_arr
-
-def get_filtered(self, filter_arr):
-    try:
-        ret = self.dataset[filter_arr]
-    except KeyError:
-        print("Filtering failed. Length data: {} vs. length filter: {}".format(len(self.dataset), len(filter_arr)))
-        ret = self.dataset[self.dataset.name == 'None']
-    return ret
-
 def get_drop_property(property_name):
     arr = []
     for item,value in dtcdata.drops.items():
@@ -74,16 +63,33 @@ def get_angle(method = AngleType.MANUAL):
     return get_manual_angle()
 
 
-
 class dtc2019():
     def __init__(self):
-        props = ['temperature', 'material', 'target_g', 'fps']
+        # First copy those properties which need not special treatment
+        copy_props = ['temperature', 'material', 'target_g', 'fps']
         self.dataset = pd.DataFrame()
         self.dataset['name'] = get_drop_names()
         # Get the easy properties which need no conversion
-        for prop in props:
+        for prop in copy_props:
             self.dataset[prop] = get_drop_property(prop)
+        # retrieve the angle and mirror it on 90° to obtain the true angle of repose
         self.dataset['manual_angle'], self.dataset['stddev manual_angle'] = get_manual_angle()
+
+    def set_filter(self, filter_arr, filter_name = "unknown"):
+        try:
+            if filter_name == 'unknown':
+                print("Using default filter name {}.".format(filter_name))
+            self.dataset[filter_name] = filter_arr
+        except ValueError as e:
+            print("Mismatch between filter and data: {}".format(e))
+
+    def get_filtered(self, filter_name = 'unknown'):
+        try:
+            ret = self.dataset[self.dataset[filter_name] == True]
+        except KeyError:
+            print("Filtering failed, filter not found: {}. Returning whole array.".format(filter_name))
+            ret = self.dataset
+        return ret
 
     def plot(self, x, y, **kwargs):
         fig, ax = plt.subplots()
