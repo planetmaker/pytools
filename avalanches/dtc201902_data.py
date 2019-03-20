@@ -44,6 +44,8 @@ class Material(Enum):
     CRUSHED_10_16 = 3
     SPHERES_50 = 4
 
+
+
 drops = {
         'drop01': {
                 'temperature': -111,
@@ -52,7 +54,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'rpm_video': 60/(1 * (954-120) / 500),
                 'fps': 500,
-                'avalanch_images': [641, 2440],
+                'observation_images': [641, 2440],  # opening of lid, last µg image
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[1283]}, # dict (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[1330]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(2435,[52.09, 51.37, 50.97, 52.59, 50.83])] # angle measured manually. Slope is 90-value
                 },
         'drop02': {
@@ -61,7 +65,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
-                'avalanch_images': [670, 758],
+                'observation_images': [670, 758], # opening of lid, last µg image
                 'manual_90angle': [(755,[54.05, 54.46, 54.64, 53.08])]
                 },
         'drop03': {
@@ -70,7 +74,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
-                'avalanch_images': [676, 763],
+                'observation_images': [676, 763],
                 'manual_90angle': [(760,[56.37, 56.18, 53.40, 54.51, 54.76])]
                 },
         'drop04': {
@@ -80,7 +84,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'rpm_video': 60/(1 * (914-67) / 500),
-                'avalanch_images': [653, 2444],
+                'observation_images': [653, 2444],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[1170]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[1300]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(2440,[53.67, 51.63, 51.70, 51.70])]
                 },
         'drop05': {
@@ -90,7 +96,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 500,
                 'rpm_video': 60/(1 * (1406-161) / 500),
-                'avalanch_images': [648, 2444],
+                'observation_images': [648, 2444],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[1114]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[1386]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(2440,[55.60, 54.36, 54.61, 54.40])]
                 },
         'drop06': {
@@ -100,7 +108,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(2 * (2580-371) / 1000),
-                'avalanch_images': [1305, 4888],
+                'observation_images': [1305, 4888],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[2299]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[2844]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4880,[42.75, 44.74, 43.53, 43.65])]
                 },
         'drop07': {
@@ -115,7 +125,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (2105-242) / 1000),
-                'avalanch_images': [1292, 4888],
+                'observation_images': [1292, 4888],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[2700]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[3700]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4880,[53.55, 51.02, 50.06, 51.23])]
                 },
         'drop08': {
@@ -130,7 +142,9 @@ drops = {
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(1 * (2710-200) / 1000),
-                'avalanch_images': [1283, 4881],
+                'observation_images': [1283, 4881],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[2350]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[3650]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4875,[56.36, 55.94, 57.00, 57.37])]
                 },
         'drop09': {
@@ -145,7 +159,9 @@ drops = {
                 'balance': CapsuleBalance.COUNTER_WEIGHT,
                 'fps': 1000,
                 'rpm_video': 60/(2 * (3914-733) / 1000),
-                'avalanch_images': [1296, 4877],
+                'observation_images': [1296, 4877],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[3900]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[4850]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4871,[52.35, 55.20, 50.85, 48.14, 53.90])]
                 },
         'drop10': {
@@ -160,7 +176,9 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'rpm_video': 60/(4 * (4903-20) / 1000),
                 'fps': 1000,
-                'avalanch_images': [784, 4848],
+                'observation_images': [784, 4848],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[4870]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':True, 'imageno':[5000]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4840,[1.26, 1.02, 0.34, 3.48, 1.18])]
                 },
         'drop11': {
@@ -175,7 +193,9 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (2497-582) / 1000),
-                'avalanch_images': [794, 4874],
+                'observation_images': [794, 4874],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[4100]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[4750]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4870,[62.59, 63.04, 62.12, 63.35])]
                 },
         'drop12': {
@@ -189,7 +209,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
-                'avalanch_images': [1516, 1616],
+                'observation_images': [1516, 1616],
                 'manual_90angle': [(1616,[61.36,56.38,59.88,59.28,59.73])]
                 },
         'drop13': {
@@ -204,7 +224,9 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (1944-73) / 1000),
-                'avalanch_images': [798, 4843],
+                'observation_images': [798, 4843],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[3300]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':False, 'imageno':[3600]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4840,[56.70,60.57,60.72])]
                 },
         'drop14': {
@@ -217,8 +239,10 @@ drops = {
                 'material': Material.CRUSHED_16_25,
                 'target_g': 0.001,
                 'balance': CapsuleBalance.FULLY_BALANCED,
-                # 'rpm_video': Not possible. Too slow rotation and only one stringer visible
-                'avalanch_images': [790, 4831], # filename! ingame image# +32
+                # 'rpm_video': Not possible. Too slow rotation and only one stringer is_lower_bound
+                'observation_images': [790, 4831], # filename! ingame image# +32
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[4500]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':True, 'imageno':[5000]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4860,[3.45,1.72,2.62,2.79])] # the gravel has MUCH different slope
                 },
         'drop15': {
@@ -233,7 +257,7 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (1553-403) / 1000),
-                # 'avalanch_images': [] (did not open)
+                # 'observation_images': [] (did not open)
                 },
         'drop16': {
                 'acc_filename': 'drop16/acc-data/drop16.txt',
@@ -247,7 +271,9 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'rpm_video': 60/(4 * (1624-479) / 1000),
                 'fps': 1000,
-                'avalanch_images': [852, 4855],
+                'observation_images': [852, 4855],
+                'avalanch_stop_image_start': {'is_lower_bound':False, 'imageno':[3200]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
+                'avalanch_stop_image_end': {'is_lower_bound':True, 'imageno':[5000]}, # Tuple (Is it detectable (i.e. beyond film), [image numbers])
                 'manual_90angle': [(4849,[62.64,62.14,61.85,62.17,61.03,59.26,61.04,58.47])]
                 },
         'drop17': {
@@ -262,7 +288,7 @@ drops = {
                 'balance': CapsuleBalance.FULLY_BALANCED,
                 'fps': 1000,
                 'rpm_video': 60/(4 * (3248-85) / 1000),
-                'avalanch_images': [798, 4843],
+                'observation_images': [798, 4843],
                 'manual_90angle': [(4840,[61.17,59.98,59.33,62.42])]
                 },
         'drop18': {
@@ -276,7 +302,7 @@ drops = {
                 'target_g': 0.3,
                 'balance': CapsuleBalance.UNBALANCED,
                 'fps': 1000,
-                'avalanch_images': [1180, 1282],
+                'observation_images': [1180, 1282],
                 'manual_90angle': [(1280,[63.23,66.64,66.53,65.85])]
                 },
         }

@@ -57,6 +57,29 @@ def get_manual_angle():
             stdarr.append(np.NaN)
     return arr, stdarr
 
+def convert_imagecount_to_seconds(num_images, fps):
+    try:
+        duration = num_images / fps
+    except:
+        duration = np.NaN
+    return duration
+
+def get_avalanch_duration():
+    arr_duration = []
+    arr_reliable = []
+    for drop, data in dtcdata.drops.items():
+        stop_start = data.get('avalanch_stop_image_start')
+        stop_end   = data.get('avalanch_stop_image_end')
+        try:
+            img_count = stop_end.get('imageno') - stop_start.get('imageno')
+            is_reliable = ~(stop_end.get('is_lower_bound') and stop_start.get('is_lower_bound'))
+            arr_duration.append(convert_imagecount_to_seconds(img_count, data.get('fps')))
+            arr_reliable.append(is_reliable)
+        except:
+            print("No avalanch duration for {}".format(drop))
+    return arr_duration, arr_reliable
+
+
 def get_angle(method = AngleType.MANUAL):
     if method == AngleType.MANUAL:
         return get_manual_angle()
@@ -74,6 +97,8 @@ class dtc2019():
             self.dataset[prop] = get_drop_property(prop)
         # retrieve the angle and mirror it on 90° to obtain the true angle of repose
         self.dataset['manual_angle'], self.dataset['stddev manual_angle'] = get_manual_angle()
+        # get the avalanch durations
+        # self.dataset['duration'], self.dataset['duration_reliability'] = get_avalanch_duration()
 
     def set_filter(self, filter_arr, filter_name = "unknown"):
         try:
