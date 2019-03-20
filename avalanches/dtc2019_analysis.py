@@ -66,7 +66,7 @@ def get_angle(method = AngleType.MANUAL):
 class dtc2019():
     def __init__(self):
         # First copy those properties which need not special treatment
-        copy_props = ['temperature', 'material', 'target_g', 'fps']
+        copy_props = ['temperature', 'material', 'target_g', 'fps', 'balance']
         self.dataset = pd.DataFrame()
         self.dataset['name'] = get_drop_names()
         # Get the easy properties which need no conversion
