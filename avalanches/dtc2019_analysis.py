@@ -39,7 +39,7 @@ def get_manual_angle():
         # Get the measured angle for each image (and ignore the image number)
         try:
             for tup_item in tuple_arr:
-                print(tup_item)
+                # print(tup_item)
                 for angle in tup_item[1]:
                     val_arr.append(angle)
             # get mean measured angle and standard deviation
@@ -65,19 +65,35 @@ def convert_imagecount_to_seconds(num_images, fps):
     return duration
 
 def get_avalanch_duration():
-    arr_duration = []
-    arr_reliable = []
+    arr_duration_min = []
+    arr_reliable_min = []
+    arr_duration_max = []
+    arr_reliable_max = []
     for drop, data in dtcdata.drops.items():
-        stop_start = data.get('avalanch_stop_image_start')
-        stop_end   = data.get('avalanch_stop_image_end')
+        duration_min = np.NaN
+        duration_max = np.NaN
+        is_reliable_min = False
+        is_reliable_max = False
         try:
-            img_count = stop_end.get('imageno') - stop_start.get('imageno')
-            is_reliable = ~(stop_end.get('is_lower_bound') and stop_start.get('is_lower_bound'))
-            arr_duration.append(convert_imagecount_to_seconds(img_count, data.get('fps')))
-            arr_reliable.append(is_reliable)
-        except:
+            [av_start_img, drop_end_img] = data.get('observation_images')
+            stop_start = data.get('avalanch_stop_image_start')
+            stop_end   = data.get('avalanch_stop_image_end')
+
+            count_min = np.mean(stop_start.get('imageno')) - av_start_img
+            count_max = np.mean(stop_end.get('imageno')) - av_start_img
+            is_reliable_min = not (stop_start.get('is_lower_bound'))
+            is_reliable_max = not (stop_end.get('is_lower_bound'))
+            duration_min = convert_imagecount_to_seconds(count_min, data.get('fps'))
+            duration_max = convert_imagecount_to_seconds(count_max, data.get('fps'))
+        except (TypeError, KeyError, AttributeError):
             print("No avalanch duration for {}".format(drop))
-    return arr_duration, arr_reliable
+
+        arr_duration_min.append(duration_min)
+        arr_duration_max.append(duration_max)
+        arr_reliable_min.append(is_reliable_min)
+        arr_reliable_max.append(is_reliable_max)
+
+    return arr_duration_min, arr_duration_max, arr_reliable_min, arr_reliable_max
 
 
 def get_angle(method = AngleType.MANUAL):
@@ -98,7 +114,7 @@ class dtc2019():
         # retrieve the angle and mirror it on 90° to obtain the true angle of repose
         self.dataset['manual_angle'], self.dataset['stddev manual_angle'] = get_manual_angle()
         # get the avalanch durations
-        # self.dataset['duration'], self.dataset['duration_reliability'] = get_avalanch_duration()
+        self.dataset['duration_min'], self.dataset['duration_max'], self.dataset['duration_min_reliability'], self.dataset['duration_max_reliability'] = get_avalanch_duration()
 
     def set_filter(self, filter_arr, filter_name = "unknown"):
         try:
