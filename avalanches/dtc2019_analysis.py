@@ -137,9 +137,17 @@ class dtc2019():
             ret = self.dataset
         return ret
 
-    def filtered(self, filter_name, value):
+    def filtered_eq(self, filter_name, value):
         try:
             ret = self.dataset[self.dataset[filter_name] == value]
+        except KeyError:
+            print("Filtering failed, filter not found: {}. Returning whole array.".format(filter_name))
+            ret = self.dataset
+        return dtc2019(dataset = ret)
+
+    def filtered_range(self, filter_name, vmin, vmax):
+        try:
+            ret = self.dataset[(self.dataset[filter_name] <= vmax) & (self.dataset[filter_name] >= vmin)]
         except KeyError:
             print("Filtering failed, filter not found: {}. Returning whole array.".format(filter_name))
             ret = self.dataset
