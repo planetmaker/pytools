@@ -17,6 +17,7 @@ class AngleType(Enum):
     MANUAL = 1
 
 import dtc201902_data as dtcdata
+from dtc201902_data import Material
 
 def get_drop_names():
     arr = []
@@ -103,8 +104,12 @@ def get_angle(method = AngleType.MANUAL):
 
 
 class dtc2019():
-    def __init__(self):
+    def __init__(self, dataset = None):
         # First copy those properties which need not special treatment
+        if dataset is not None:
+            self.dataset = dataset
+            return
+
         copy_props = ['temperature', 'material', 'target_g', 'fps', 'balance']
         self.dataset = pd.DataFrame()
         self.dataset['name'] = get_drop_names()
@@ -132,10 +137,20 @@ class dtc2019():
             ret = self.dataset
         return ret
 
+    def filtered(self, filter_name, value):
+        try:
+            ret = self.dataset[self.dataset[filter_name] == value]
+        except KeyError:
+            print("Filtering failed, filter not found: {}. Returning whole array.".format(filter_name))
+            ret = self.dataset
+        return dtc2019(dataset = ret)
+
     def plot(self, x, y, **kwargs):
         fig, ax = plt.subplots()
         plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
         ax.plot(self.dataset[x], self.dataset[y], 'k+', label=y, **kwargs)
 
 if __name__ == '__main__':
+    dtc = dtc2019()
+    # dtc.filtered('material','Material.CRUSHED_16_25').plot('target_g','manual_angle')
     pass
