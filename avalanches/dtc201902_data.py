@@ -43,6 +43,7 @@ class Material(Enum):
     CRUSHED_16_25 = 2
     CRUSHED_10_16 = 3
     SPHERES_50 = 4
+    ROCKS_50 = 5
 
 
 
@@ -304,6 +305,41 @@ drops = {
                 'fps': 1000,
                 'observation_images': [1180, 1282],
                 'manual_90angle': [(1280,[63.23,66.64,66.53,65.85])]
+                },
+        }
+
+drops_paul = {
+        'drop101': {
+                'target_g': 0.3,
+                'material': Material.ROCKS_50,
+                'manual_90angle': [(0,[26])],
+                'position': 18,
+                'duration': 1.0,
+                'width': 140,
+                },
+        'drop102': {
+                'target_g': 0.1,
+                'material': Material.ROCKS_50,
+                'manual_90angle': [(0,[29])],
+                'position': 12,
+                'duration': 2.5,
+                'width': 123,
+                },
+        'drop103': {
+                'target_g': 0.03,
+                'material': Material.ROCKS_50,
+                'manual_90angle': [(0,[40])],
+                'position': 4,
+                'duration': 4.4,
+                'width': 100,
+                },
+        'drop104': {
+                'target_g': 0.01,
+                'material': Material.ROCKS_50,
+                'manual_90angle': [(0,[46])],
+                'position': 55,
+                'duration': 4.7,
+                'width': 68,
                 },
         }
 
