@@ -306,37 +306,37 @@ drops = {
                 'observation_images': [1180, 1282],
                 'manual_90angle': [(1280,[63.23,66.64,66.53,65.85])]
                 },
-        }
-
-drops_paul = {
-        'drop101': {
+#        }
+#
+#drops_paul = {
+        'paul01': {
                 'target_g': 0.3,
                 'material': Material.ROCKS_50,
-                'manual_90angle': [(0,[26])],
+                'manual_90angle': [(0,[90-26])],
                 'position': 18,
                 'duration': 1.0,
                 'width': 140,
                 },
-        'drop102': {
+        'paul02': {
                 'target_g': 0.1,
                 'material': Material.ROCKS_50,
-                'manual_90angle': [(0,[29])],
+                'manual_90angle': [(0,[90-29])],
                 'position': 12,
                 'duration': 2.5,
                 'width': 123,
                 },
-        'drop103': {
+        'paul03': {
                 'target_g': 0.03,
                 'material': Material.ROCKS_50,
-                'manual_90angle': [(0,[40])],
+                'manual_90angle': [(0,[90-40])],
                 'position': 4,
                 'duration': 4.4,
                 'width': 100,
                 },
-        'drop104': {
+        'paul04': {
                 'target_g': 0.01,
                 'material': Material.ROCKS_50,
-                'manual_90angle': [(0,[46])],
+                'manual_90angle': [(0,[90-46])],
                 'position': 55,
                 'duration': 4.7,
                 'width': 68,
