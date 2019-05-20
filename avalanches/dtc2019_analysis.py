@@ -153,10 +153,27 @@ class dtc2019():
             ret = self.dataset
         return dtc2019(dataset = ret)
 
-    def plot(self, x, y, **kwargs):
-        fig, ax = plt.subplots()
-        plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
-        ax.plot(self.dataset[x], self.dataset[y], 'k+', label=y, **kwargs)
+    def plot(self, x, y, fig = None, ax = None, symbol = None, **kwargs):
+        if fig is None:
+            fig, ax = plt.subplots()
+            plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
+        if symbol is None:
+            symbol = 'k+'
+        print(symbol)
+        ax.plot(self.dataset[x], self.dataset[y], symbol, label=y, **kwargs)
+        return fig, ax
+
+    def errorplot(self, x, y, fig = None, ax = None, symbol = None, **kwargs):
+        if fig is None:
+            fig, ax = plt.subplots()
+            plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
+        if symbol is None:
+            symbol = 'k+'
+        indices = np.argsort(self.dataset[x])
+        xv = self.dataset[x][indices]
+        yv = self.dataset[y][indices]
+        ax.errorbar(xv, yv, yerr=0.1)
+        return fig, ax
 
 if __name__ == '__main__':
     dtc = dtc2019()
