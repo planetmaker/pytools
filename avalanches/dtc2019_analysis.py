@@ -110,7 +110,7 @@ class dtc2019():
             self.dataset = dataset
             return
 
-        copy_props = ['temperature', 'material', 'target_g', 'fps', 'balance']
+        copy_props = ['temperature', 'material', 'target_g', 'fps', 'balance', 'duration', 'width']
         self.dataset = pd.DataFrame()
         self.dataset['name'] = get_drop_names()
         # Get the easy properties which need no conversion
@@ -158,21 +158,23 @@ class dtc2019():
             fig, ax = plt.subplots()
             plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
         if symbol is None:
-            symbol = 'k+'
+            symbol = 's'
         print(symbol)
         ax.plot(self.dataset[x], self.dataset[y], symbol, label=y, **kwargs)
         return fig, ax
 
-    def errorplot(self, x, y, fig = None, ax = None, symbol = None, **kwargs):
+    def errorplot(self, x, y, ye, fig = None, ax = None, symbol = None, **kwargs):
         if fig is None:
             fig, ax = plt.subplots()
             plt.gcf().canvas.set_window_title("{} vs. {}".format(y,x))
         if symbol is None:
-            symbol = 'k+'
-        indices = np.argsort(self.dataset[x])
-        xv = self.dataset[x][indices]
-        yv = self.dataset[y][indices]
-        ax.errorbar(xv, yv, yerr=0.1)
+            symbol = 's'
+#        indices = np.argsort(self.dataset[x])
+        xv = self.dataset[x]
+        yv = self.dataset[y]
+        ye = self.dataset[ye]
+        print(xv, yv, ye)
+        ax.errorbar(xv, yv, fmt=symbol, yerr=ye, label=y, **kwargs)
         return fig, ax
 
 if __name__ == '__main__':
