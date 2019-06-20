@@ -21,7 +21,7 @@ from BNE.bne_read_ods_yamada import bne_read_ods_yamada
 
 from BNE.single_stage_programme import stage_programme_names, single_stage_programme
 from BNE.bne_config import bne_config
-from tools.version_info import get_hg_version
+from tools.version_info import get_hg_version, get_git_version
 
 
 
@@ -125,8 +125,10 @@ def add_image_metadata(f, metadata=None):
 
 
 def write_diff(path):
-    subprocess.run(["hg", "-R", bne_config.get('code_path'), "diff"],stdout=path + "code.diff", universal_newlines=True)
-    subprocess.run(["hg", "-R", bne_config.get('project_path'), "diff"],stdout=path + "data.diff", universal_newlines=True)
+    with open(os.path.join(path,"code.diff"), "w") as f:
+        subprocess.run(["git", "-C", bne_config.get('code_path'), "diff", "HEAD"],stdout=f, universal_newlines=True)
+    with open(os.path.join(path,"data.diff"), "w") as f:
+        subprocess.run(["hg", "-R", bne_config.get('project_path'), "diff"],stdout=f, universal_newlines=True)
 
 
 def bne_model_powerlaw(x, A):
@@ -253,12 +255,12 @@ def main():
         e['L'] = L
 
     # Create directory for saved plots
-    codeversion, code_modified = get_hg_version()
+    codeversion, code_modified = get_git_version()
     dataversion, data_modified = get_hg_version(bne_config.get('project_path'))
     figure_path = bne_config.get('project_path') + bne_config.get('plot_path') + codeversion + '/'
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
-    #write_diff(figure_path)
+    write_diff(figure_path)
     png_metadata = {
             'Author': 'TU Braunschweig, Ingo von Borstel',
             'Code version': codeversion,
