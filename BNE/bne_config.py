@@ -10,7 +10,7 @@ from os.path import expanduser
 PROJECT_PATH = expanduser("~") + "/icaps/BNE/"
 
 bne_config = {
-        'code_path': expanduser("~") + "/idltools/BNE",
+        'code_path': expanduser("~") + "/pytools/BNE",
         'project_path': expanduser("~") + "/icaps/BNE/",
         'sensor_path': "sensor/",
         'plot_path': "plots/",
