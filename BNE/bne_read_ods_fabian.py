@@ -6,9 +6,9 @@ Read an ODS file for the BNE experiments by the Bachelor Student Fabian Helms
 
 @author: ingo
 """
-from ods_experiment_table import ods_experiment_table
-from bne_config import bne_config
-from cast_lists import one_over_x
+from BNE.ods_experiment_table import ods_experiment_table
+from BNE.bne_config import bne_config
+from tools.cast_lists import one_over_x
 
 import numpy as np
 from math import pi

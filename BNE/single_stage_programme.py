@@ -8,7 +8,7 @@ Created on Fri Aug 10 11:22:32 2018
 
 import warnings
 
-from ODSReader import ODSReader
+from tools.ODSReader import ODSReader
 
 import numpy as np
 import pandas as pd
@@ -17,8 +17,8 @@ from scipy.ndimage.interpolation import shift
 
 import matplotlib.pyplot as plt
 
-from bne_config import bne_config
-from cast_lists import cast_to_float, list_to_int
+from BNE.bne_config import bne_config
+from tools.cast_lists import cast_to_float, list_to_int
 
 default_calibration = {
         'level0g': 2.4655959,

@@ -8,10 +8,10 @@ Created on Tue Aug 28 11:01:13 2018
 import numpy as np
 import glob
 
-from ods_experiment_table import ods_experiment_table
-from bne_config import bne_config
+from BNE.ods_experiment_table import ods_experiment_table
+from BNE.bne_config import bne_config
 
-from single_stage_programme import single_stage_programme, stage_programme_names
+from BNE.single_stage_programme import single_stage_programme, stage_programme_names
 
 def v_from_taps(fill_height, frequency, taps):
     try:

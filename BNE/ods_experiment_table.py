@@ -6,8 +6,8 @@ Created on Mon Sep 24 15:21:03 2018
 @author: ingo
 """
 
-from ODSReader import ODSReader
-from cast_lists import list_to_float, list_to_int
+from tools.ODSReader import ODSReader
+from tools.cast_lists import list_to_float, list_to_int
 
 import numpy as np
 

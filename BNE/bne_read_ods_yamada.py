@@ -7,8 +7,8 @@ Created on Tue Aug 28 11:01:13 2018
 """
 import numpy as np
 
-from ods_experiment_table import ods_experiment_table
-from bne_config import bne_config
+from BNE.ods_experiment_table import ods_experiment_table
+from BNE.bne_config import bne_config
 
 class bne_read_ods_yamada(ods_experiment_table):
     def __init__(self):
