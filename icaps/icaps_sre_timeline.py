@@ -12,9 +12,13 @@ import pandas as pd
 
 components = {}
 
-end_mug = 375 # seconds
+end_mug = 364 # seconds
 brown_time = 150 # seconds
 agglomeration_time = 150 # seconds
+
+relaxation_time = 5
+analyse_injection_time = 0.5
+
 
 tmin = -50
 tmax = 450
@@ -87,9 +91,8 @@ def add_component(name, color, timeslot=None, ctype=Component):
 # name, color, [ (start, duration), (start, duration), ...]
 
 #
-add_component('restore cloud',      'mediumpurple')
-add_component('center agglomerate', 'mediumpurple')
-add_component('measure cloud v',    'blueviolet')
+add_component('observe hands-off',  'blueviolet')
+# add_component('CMS levitate', 'mediumpurple')
 
 add_component('CMS levitate',       'slateblue')
 add_component('CMS squeeze',        'slateblue')
@@ -103,16 +106,14 @@ add_component('CMS E +z',           'dodgerblue')
 
 add_component('Scan cloud',         'salmon')
 add_component('Scan agglomerate',   'palevioletred')
-add_component('Forced agglom.',     'lightpink')
-add_component('Brownian motion',    'lightpink')
 
 add_component('LDM illumination',   'yellow',      timeslot=(-5,tmax))
 add_component('OOS illumination',   'peru',        timeslot=(-5,tmax))
-
 add_component('LDM camera',         'olivedrab',   timeslot=(-5,tmax))
 add_component('OOS camera',         'yellowgreen', timeslot=(-5,tmax))
 
 add_component('analyse injection',  'lightgrey')
+add_component('gas flow',           'lightgrey')
 add_component('open shutter valve', 'dimgray')
 add_component('injection piston',   'gray')
 add_component('cogwheel',           'black')
@@ -124,23 +125,24 @@ add_component('cogwheel',           'black')
 
 def position_particle(time, duration=1):
     t = time
-    t = components['center agglomerate'].add_time((time,duration))
+    t = components['CMS levitate'].add_time((time,duration))
     return t
-def restore_cloud(time, duration=1):
+
+def restore_cloud(time, duration=3):
     t = time
-    t = components['restore cloud'].add_time((time,duration))
+    t = components['CMS levitate'].add_time((time,duration))
     return t
 
 def scan(time, direction='z'):
     t = time
     # center particle back and forth, look with LDM, LSU and sometimes also OOS
-    t = components['CMS scan -' + direction].add_time((t,3))
-    t = components['CMS scan +' + direction].add_time((t,6))
-    t = components['CMS scan -' + direction].add_time((t,3))
+    t = components['CMS scan -' + direction].add_time((t,2))
+    t = components['CMS scan +' + direction].add_time((t,4))
+    t = components['CMS scan -' + direction].add_time((t,2))
     return t
 
-def scan_cloud(time):
-    t = scan(time)
+def scan_cloud(time, duration=8, direction='z'):
+    t = scan(time, direction=direction)
     components['Scan cloud'].add_time((time,t-time))
     return t
 
@@ -150,44 +152,51 @@ def scan_agglomerate(time):
     t = scan(t)
     scan(t_scan, direction='x')
     components['Scan agglomerate'].add_time((t_scan, t-t_scan))
-    t = restore_cloud(t)
+    # t = restore_cloud(t)
     return t
 
-def loop_brown(time):
-    # observe 10s
+def step_view_agglomerate(time, n=1):
     t = time
+    print("{:6.1f}: Starting cloud scan for particle(s).".format(t))
+    t = scan_cloud(t,direction='x')
+    for i in range(0,n):
+        print("{:6.1f}: Positioning + scanning particle start.".format(t))
+        t = position_particle(t, duration=1)
+        t = scan_agglomerate(t)
+        print("{:6.1f}: Positioning + scanning particle end.".format(t))
+    return t
 
-    t_start_levitate = t
-    t = components['CMS levitate'].add_time((t, 10))
-    # t = adjust_CMS(t)
+def step_brown(time):
+    # 15s levitation (= keep cloud in centre, mostly undisturbed)
+    t = time
+    t = components['CMS levitate'].add_time((t, 13))
+    # scan cloud in z-direction
     t = scan_cloud(t)
     return t
 
-def largest_particle(time):
+def scan_e(time, duration=2): # initial scan of the cloud
     t = time
-    t = position_particle(t) # 3s
-    scan_t = t
-    t = scan_agglomerate(t)
-    components['Scan agglomerate'].add_time((scan_t, t-scan_t))
-    t = restore_cloud(t) # 3
-    print("{:6.1f}: Largest particle finished in {:4.1f}s.".format(t,t-time))
-    return t
-
-def scan_e(time): # initial scan of the cloud
-    t = time
-    t = components['CMS E +z'].add_time((t, 0.5))
-    t = components['CMS E -z'].add_time((t, 0.5))
+    t = components['CMS E +z'].add_time((t, duration))
+    t = components['CMS E -z'].add_time((t, duration))
+    # Add 100ms of dead time to restore voltages to 0V
+    t = components['observe hands-off'].add_time((t, 0.1))
+    
     print("        Charge scan particle: {:4.1f}".format(t-time))
     return t
 
-def loop_agglomerate(time):
+def step_squeeze(time):
     t = time
+    # levitate / center cloud
+    t = components['CMS levitate'].add_time((t, 3))
     # squeezing
-    t = components['CMS squeeze'].add_time((t, 15))
-    # scan
-    t = scan_cloud(t)
-    components['Forced agglom.'].add_time((time,t-time))
-    print("        Loop agglomerate: {:4.1f}".format(t-time))
+    t = components['CMS squeeze'].add_time((t, 4))
+    # levitate / center cloud
+    t = components['CMS levitate'].add_time((t, 3))
+    # squeezing
+    t = components['CMS squeeze'].add_time((t, 4))
+    # levitate / center cloud
+    t = components['CMS levitate'].add_time((t, 3))
+    print("        Step agglomerate: {:4.1f}".format(t-time))
     return t
 
 #################################################
@@ -197,76 +206,69 @@ def loop_agglomerate(time):
 #
 def phase_injection(time):
     t = time
-    # First 22 seconds are injection. That's directly defined above in the item definitions
-    components['cogwheel'].add_time((-30,60))
-
-    relaxation_time = 7.5
-
-    # First injection
-    t = components['injection piston'].add_time((-1,6))
-    components['open shutter valve'].add_time((0,5))
-    t_end_injection1 = t
-    t = components['analyse injection'].add_time((t_end_injection1,relaxation_time))
-    components['measure cloud v'].add_time((t_end_injection1,relaxation_time-2))
-    scan_e(t_end_injection1+relaxation_time-1)
-    #total_time = scan_e(total_time)
-
-#    # possible re-injection
-    components['injection piston'].add_time((t,6))
-    t = components['open shutter valve'].add_time((t+1,5))
-    t_end_injection2 = t
-    t = components['analyse injection'].add_time((t_end_injection2,relaxation_time))
-    components['measure cloud v'].add_time((t_end_injection2,relaxation_time-2))
-    scan_e(t_end_injection2+relaxation_time-1)
-
+    # An injection starts 5s before the actual injection with activation of stuff
+    components['cogwheel'].add_time((t-5,8))
+    components['open shutter valve'].add_time((-2,5))
+    components['gas flow'].add_time((-2,5))
+    t = components['injection piston'].add_time((t-1,4))
+    
+    t = components['analyse injection'].add_time((t,analyse_injection_time))
+    # t = scan_e(t, duration=0.5)
+    #    t = step_injection(t)
+    
     print("{:6.1f}: Injection finished".format(t))
     return t
 #
-def phase_brown(time, duration=brown_time):
+def phase_brown(time):
     # brownian motion first, Phase I
-    # Each takes 24 seconds: 2s CMS adjustment, 10s nothing, 12s analysis
+    print("{:6.1f}: Starting Brownian phase".format(time))   
     t0 = time
-    t = loop_brown(t0)
-    loop_duration = t - t0
-    n_loops, t_remain = divmod(duration, loop_duration)
-    n_loops = int(n_loops)
-    print("        Executing {} Brown loops of {:4.1f}s length each. {:4.1f}s unused.".format(n_loops, loop_duration, t_remain))
+    t = scan_e(t0,duration=1)
+    t = step_brown(t) # 1
+    t = step_brown(t) # 2
+    t = step_brown(t) # 3
+    t = step_brown(t) # 4
+    t = step_brown(t) # 5
+    t = step_brown(t) # 6
+    
+    t = components['CMS levitate'].add_time((t,15))
+    t = step_view_agglomerate(t)
+    print("{:6.1f}: Ending Brownian phase.".format(t))
 
-    for loop in range(1,int(n_loops)):
-        t = loop_brown(t)
-
-    components['Brownian motion'].add_time((t0, t-t0))
-
-    print("{:6.1f}: Brownian motion finished.".format(t))
     return t
 
-def phase_agglomerate(time, duration=agglomeration_time):
+def phase_agglomerate(time):
     # electric measurement
     t = time
-    t = components['CMS E +z'].add_time((t,2))
-    t = components['CMS E -z'].add_time((t,4))
-    t = components['CMS E +z'].add_time((t,2))
-    t0 = t
-    t = loop_agglomerate(t0)
-    loop_duration= t - t0
-    n_loops, t_remain = divmod(duration-2*8, loop_duration) # reduce by E-scan at start and end
-    n_loops = int(n_loops)
-    print("        Executing {} agglomeration loops of {:4.1f}s length each. {:4.1f}s unused.".format(n_loops, loop_duration, t_remain))
+    print("{:6.1f}: Starting forced agglomeration phase".format(t))
 
-    for loop in range(1, int(n_loops)):
-        t = loop_agglomerate(t)
+    t = components['CMS levitate'].add_time((t,3))
+    t = scan_e(t)
+    t0 = t
+    t = step_squeeze(t0)
+    t = scan_cloud(t)
+    t = step_squeeze(t)
+
+    t = step_view_agglomerate(t)
+
+    t = step_squeeze(t)
+    t = scan_cloud(t)
+    t = step_squeeze(t)
+    t = scan_cloud(t)
+    t = step_squeeze(t)
+    
+    t = step_view_agglomerate(t, n=3)
 
     # Final E-scan
-    t = components['CMS E +z'].add_time((t,2))
-    t = components['CMS E -z'].add_time((t,4))
-    t = components['CMS E +z'].add_time((t,2))
+    t = scan_e(t)
 
-    print("{:6.1f}: Forced agglomeration finished.".format(t))
+    print("{:6.1f}: Ending forced agglomeration phase.".format(t))
     return t
 
 def phase_post_mug(time):
-    t = loop_agglomerate(time)
-    t = scan_agglomerate(t)
+    t = components['observe hands-off'].add_time((time,end_mug-time))
+    print("{:6.1f}: Starting undisturbed cloud expansion".format(time))
+    print("{:6.1f}: End of µg, Shutting down of systems".format(t))
     return t
 
 
@@ -312,9 +314,10 @@ def read_from_excel(filename='icaps_timeline.xlsx'):
 
 def write_to_excel(timeline):
     pd_timeline = pd.DataFrame.from_dict(timeline)
-    writer = pd.ExcelWriter('icaps_timeline.xlsx')
-    pd_timeline.to_excel(writer, sheet_name='Timeline')
-    writer.save()
+#    writer = pd.ExcelWriter('icaps_timeline.xlsx')
+#    pd_timeline.to_excel(writer, sheet_name='Timeline')
+#    writer.save()
+
 
 
 
@@ -324,26 +327,22 @@ injection_time = total_time
 # Do some initial measurements on the freshly-injected particles (part of injection)
 #total_time = scan_e(total_time)
 scan_e_time = total_time
+total_time = components['observe hands-off'].add_time((total_time,relaxation_time))
 
 # Brownian growth
 start_brown = total_time
-total_time = phase_brown(total_time, duration=180)
 
-# Analyse the largest particle grown due to Brownian motion: Phase II
-total_time = largest_particle(total_time)
+print("Pre-brown: ",total_time)
+total_time = phase_brown(total_time)
+print("Brown time: ",total_time)
 
-# Use forced agglomeration to grow larger particles: Phase III
+# Use forced agglomeration to grow larger particles: Phase II
 # Each takes 36 seconds: 12s electric analysis, 12s squeezing, 12s analysis
 start_agglomerate = total_time
-total_time = phase_agglomerate(total_time, duration=120)
-
-# Image the three largest particles grown: Phase IV
-
+total_time = phase_agglomerate(total_time)
 end_agglomerate = total_time
-for loop in range(0,3):
-    total_time = largest_particle(total_time)
 
-# continue until end: Phase V
+# continue until end: Phase III
 total_time = phase_post_mug(total_time)
 #
 fig, ax = plt.subplots()
@@ -379,9 +378,9 @@ ax.grid(True)
 ymax = len(components)
 
 # Annotate 2nd injection
-ax.annotate('optional 2nd,\ninjection',
-                  xy=(17, ymax-2), xycoords='data',
-                  xytext=(50, ymax-2), textcoords='data',
+ax.annotate('optional 2nd,\ninjection starts here',
+                  xy=(injection_time, ymax-2), xycoords='data',
+                  xytext=(injection_time+20, ymax-2), textcoords='data',
                   size=8,
                   arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
 
@@ -390,37 +389,23 @@ ax.annotate('end of µg', (end_mug, ymax-2), xycoords='data',
             size=8,
             arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5)),
 
-#ax.annotate('end of µg', xy=(end_mug+20, ymax-2), xytext=(end_mug+20, ymax-2), textcoords='data', fontsize=8,
-#            horizontalalignment='center')
-
-
-# Annotate scan for charges
-ycharge = 10
-rect = Rectangle((7.5,ycharge),scan_e_time+2,2,fill=False,color='black',linewidth=1.5,linestyle='-')
-#rect = Rectangle((0.5,0.5),0.1,0.1,fill=True,color='black',linewidth=5,linestyle='-',figure=ax)
-ax.add_patch(rect)
-ax.annotate('short scan for charge\n0.5s each direction\nafter injection(s)', (scan_e_time+10, ycharge), xycoords='data',
-            xytext=(scan_e_time+25, ycharge), textcoords='data',
-            size=8,
-            arrowprops=dict(facecolor='black', shrink=-5, width=1, headwidth=5, headlength=5))
-
 # annotate different phases
-ax.annotate('Brownian phase', (start_brown+(start_agglomerate - start_brown) / 2, ymax), textcoords='data',
+ax.annotate('Brownian phase', (start_brown+(start_agglomerate - start_brown) / 2, ymax+0.5), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('Agglomeration phase', (start_agglomerate+(end_agglomerate - start_agglomerate) / 2, ymax), textcoords='data',
+ax.annotate('Agglomeration phase', (start_agglomerate+(end_agglomerate - start_agglomerate) / 2, ymax+0.5), textcoords='data',
             size=10, horizontalalignment='center')
-ax.annotate('Scan', (end_agglomerate+(end_mug - end_agglomerate) / 2, ymax), textcoords='data',
+ax.annotate('Scan', (end_agglomerate+(end_mug - end_agglomerate) / 2, ymax+0.5), textcoords='data',
             size=10, horizontalalignment='center')
 
 # indicate exact times
 uppery = 0.95
-plt.axvline(x=start_brown, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
+plt.axvline(x=injection_time, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
 plt.axvline(x=start_agglomerate, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
 plt.axvline(x=end_agglomerate, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
 # annotate end of µg
 plt.axvline(x=end_mug, ymin=0, ymax = uppery, linewidth=1, color='k', linestyle='dashed')
 
-ax.annotate('{:3.0f}s'.format(start_brown), (start_brown+5, ymax), textcoords='data',
+ax.annotate('{:3.0f}s'.format(injection_time), (injection_time+1, ymax), textcoords='data',
             size=10, horizontalalignment='left')
 ax.annotate('{:3.0f}s'.format(start_agglomerate), (start_agglomerate, ymax), textcoords='data',
             size=10, horizontalalignment='center')
@@ -435,16 +420,16 @@ rect2 = Rectangle((tmin+25,0.2),150,1.5,
                   facecolor='white',linewidth=1.5,linestyle='-',edgecolor='black')
 
 # Annotate the 1st position with a text box ('Test 1')
-text_scandir = TextArea("Adjust such that agglomerates are scanned\nin the viewing direction of the LDM", minimumdescent=False)
-ab = AnnotationBbox(text_scandir, (tmin+30, 2.7),
-                    xybox=(5, 6.5), # center of text box in data coordinates
+text_scandir = TextArea("Adjust x and z scan speed such that agglomerates\n are scanned in the viewing direction of the LDM", minimumdescent=False)
+ab = AnnotationBbox(text_scandir, (tmin+60, 2.7),
+                    xybox=(15, 11.5), # center of text box in data coordinates
                     xycoords='data',
                     boxcoords="data"
                     )
 ax.add_artist(ab)
 
 
-text_scandir = TextArea("Note:\nSequence assumes that\n the LDM camera cannot\n see the OOS light and\n vice versa (e.g. that\n colour filters are used)", minimumdescent=False)
+text_scandir = TextArea("Note:\nSequence assumes that\n the LDM camera cannot\n see the OOS light and\n vice versa (e.g. that\n colour filters are used).\nCMS levitate includes\nkeeping cloud in centre.", minimumdescent=False)
 ab2 = AnnotationBbox(text_scandir, (422, 1),
                     xybox=(417, 1.7), # center of text box in data coordinates
                     xycoords='data',
