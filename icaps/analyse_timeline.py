@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Might need python >= 3.8 or related matplotlib
 """
 Created on Tue Apr 21 14:45:51 2020
 
@@ -15,12 +16,6 @@ filename = "~/PowerFolders/ICAPS_data_analysis/Housekeeping/log_1000Hz_15112019_
 
 df = pd.read_csv(filename, sep=';') # , index_col='time_stamp')
 
-#df.plot(kind='scatter', x='time_stamp', y='Icm1', color='red', ax=ax)
-#df.plot(kind='scatter', x='time_stamp', y='Icm2', color='blue', ax=ax)
-#ax2 = ax.twinx()
-#
-#df.plot(kind='scatter', x='time_stamp', y='Uvm1', color='navy', ax=ax2)
-
 print(df['oos2'])
 
 count = 0
@@ -33,28 +28,14 @@ print("Number of OOS image trigger changes / trigger highs encountered: ",count,
 
 print(sum(df['ldm']))
 
-#current = 0
-#for timestamp,val in zip(df['time_stamp'], df['Icm1']):
-#    aval = abs(val)
-#    if (aval > 0.05 and current < 0.05):
-#        startt = timestamp
-#        current = aval
-#    if (aval < 0.05 and current > 0.05):
-#        print(startt, ' ... ', timestamp)
-#        current = aval
-
 
 imgcalib = pd.read_excel('~/PowerFolders/ICAPS_data_analysis/ICAPS_event_timeline_20200423.xlsx') 
 
-#print(imgcalib)
-#calib = []
-#for timestamp,oosimg in zip(imgcalib['time_stamp'],imgcalib['OOS image#']):
-#    if (timestamp is not null) and (oosimg is not null):
-#        calib.append((timestamp,oosimg))
+
 calib = imgcalib[imgcalib.time_stamp.notnull()]
 calib = calib[calib['OOS image#'].notnull()]
 n_OOS_images = 18437
-# dOOSdt = n_OOS_images / (list(calib['time_step'])[-1] - list(calib['time_step'])[0])
+dOOSdt = n_OOS_images / (list(calib['time_stamp'])[-1] - list(calib['time_stamp'])[0])
 
 #print(list(calib['time_stamp'])[-1])
 
@@ -93,35 +74,47 @@ ax2.set_ylabel('U rings')
 ax2.plot(df['time_stamp'], df['Uvm1'], color='blue')
 ax2.plot(df['time_stamp'], df['Uvm2'], color='navy')
 ax2.legend()
-#
-#def filter_by_t(seq, val):
-#    for el in seq:
-#        if el.attribute > val: yield el
-#
-#def time2oosimg(X):
-#    global calib
-#    print(calib)
-#    global n_OOS_images
-#    return (X - list(calib['time_stamp'])[0]) * dOOSdt
-#
-#def oosimg2time(X):
-#    return X
-##
-#
-#def oos_ticks_function(X):
-#    global calib
-#    global n_OOS_images
-#    listt = list(calib['time_step']) - X
-#    lastt = filter_by_t(listt, X)
-#    print('Lastt: ', lastt)
-#    return  X
 
+def get_last_calib(X, reverse=False):
+    global calib
+    listlastt = list()
+    listlastimg = list()
+    for item in X:
+        lastt = 0
+        lastimg = 0
+        for t,img in zip(calib['time_stamp'],calib['OOS image#']):
+            if not reverse:
+                if t < item:
+                    lastt = t
+                    lastimg = img
+            else:
+                if img < item:
+                    lastt = t
+                    lastimg = img
+        listlastt = lastt
+        listlastimg = lastimg
+    return (listlastt, listlastimg)
 
-#oos_ticks, labels = ax1.ticks()
+def timestep_to_oosimg(X):
+    global calib
+    global n_OOS_images
+    global dOOSdt
+    
+    (lastt, lastimg) = get_last_calib(X)
+    return (X - lastt) * dOOSdt + lastimg
 
-#
-#secx = ax1.secondary_xaxis('top', functions=(time2oosimg, oosimg2time))
-#secx.set_xlabel('OOS image #')
+def oosimg_to_timestep(X):
+    global calib
+    global n_OOS_images
+    global dOOSdt
+    
+    (lastt, lastimg) = get_last_calib(X, reverse=True)
+    return (X - lastimg) / dOOSdt + lastt
+    
+
+secx = ax1.secondary_xaxis('top', functions=(timestep_to_oosimg, oosimg_to_timestep))
+secx.set_xlabel('OOS image #')
+
 
 fig.tight_layout()
 plt.show()
