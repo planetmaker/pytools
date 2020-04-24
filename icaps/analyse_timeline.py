@@ -8,16 +8,16 @@ Created on Tue Apr 21 14:45:51 2020
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import math
 
-filename = "~/PowerFolders/ICAPS_data_analysis/Housekeeping/log_1000Hz_15112019_113621.csv"
+filename_housekeeping = "~/PowerFolders/ICAPS_data_analysis/Housekeeping/log_1000Hz_15112019_113621.csv"
+filename_timeline     = "~/PowerFolders/ICAPS_data_analysis/ICAPS_event_timeline_20200423.xlsx"
 
-df = pd.read_csv(filename, sep=';') # , index_col='time_stamp')
+df = pd.read_csv(filename_housekeeping, sep=';') # , index_col='time_stamp')
 
-print(df['oos2'])
+#print(df['oos2'])
 
+# Count how many triggers are sent to the OOS camera #2
 count = 0
 current = 0
 for val in df['oos2']:
@@ -25,19 +25,18 @@ for val in df['oos2']:
         count = count + 1
         current = val
 print("Number of OOS image trigger changes / trigger highs encountered: ",count, count/2)
-
 print(sum(df['ldm']))
 
 
-imgcalib = pd.read_excel('~/PowerFolders/ICAPS_data_analysis/ICAPS_event_timeline_20200423.xlsx') 
+# Read the timeline file where we manually maintain important events
+imgcalib = pd.read_excel(filename_timeline) 
 
 
+# Calculate differential calibration from that timeline
 calib = imgcalib[imgcalib.time_stamp.notnull()]
 calib = calib[calib['OOS image#'].notnull()]
 n_OOS_images = 18437
 dOOSdt = n_OOS_images / (list(calib['time_stamp'])[-1] - list(calib['time_stamp'])[0])
-
-#print(list(calib['time_stamp'])[-1])
 
 oos_images_per_timestep = n_OOS_images / (list(calib['time_stamp'])[-1] - list(calib['time_stamp'])[0])
 print('Average OOS images per timestep: ',oos_images_per_timestep)
@@ -55,7 +54,7 @@ for t,img in zip(calib['time_stamp'],calib['OOS image#']):
     last_t = t
     last_img = img
 
-    
+# Make the plot for everything. You can manually zoom-in and save partial images    
 fig,ax1 = plt.subplots()
 
 ax1.set_xlabel('time [ms]')
@@ -75,6 +74,7 @@ ax2.plot(df['time_stamp'], df['Uvm1'], color='blue')
 ax2.plot(df['time_stamp'], df['Uvm2'], color='navy')
 ax2.legend()
 
+# Calibration, matching time_stamp to OOS image# (and reverse)
 def get_last_calib(X, reverse=False):
     global calib
     listlastt = list()
@@ -95,6 +95,7 @@ def get_last_calib(X, reverse=False):
         listlastimg = lastimg
     return (listlastt, listlastimg)
 
+# convert time_stamp to OOS image#
 def timestep_to_oosimg(X):
     global calib
     global n_OOS_images
@@ -103,6 +104,7 @@ def timestep_to_oosimg(X):
     (lastt, lastimg) = get_last_calib(X)
     return (X - lastt) * dOOSdt + lastimg
 
+# convert OOS image# to time_stamp
 def oosimg_to_timestep(X):
     global calib
     global n_OOS_images
@@ -112,6 +114,7 @@ def oosimg_to_timestep(X):
     return (X - lastimg) / dOOSdt + lastt
     
 
+# Add a secondary x-axis showing the OOS image #
 secx = ax1.secondary_xaxis('top', functions=(timestep_to_oosimg, oosimg_to_timestep))
 secx.set_xlabel('OOS image #')
 
