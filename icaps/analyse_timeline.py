@@ -177,29 +177,43 @@ plot_colors = ['blue', 'red']
 
 from matplotlib import gridspec
 
+image_ranges = [(0,370000), (31107,43907), (51507,65307), (72507,86407), (93907,107407)]
+
+cm = 1/2.54
+
 for name, deltaT in zip(plot_names, deltaTs):
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(30*cm, 20*cm))
     plt.title(str(deltaT))
     gs = gridspec.GridSpec(2, 1, height_ratios=[2,1])
     ax0 = plt.subplot(gs[0])
     ax0.set_title(name)
     ax0.set_xlabel('time [ms]')
     ax0.set_ylabel('temperature difference [K]')
+    ax0.set_ylim(-2,2)
     secx = ax0.secondary_xaxis('top', functions=(timestep_to_ldmimg, ldmimg_to_timestep))
-    secx.set_xlabel('OOS image #')
+    secx.set_xlabel('LDM image #')
     ax1 = plt.subplot(gs[1], sharex = ax0)
     ax1.set_ylabel('residual temperature T- <T_500ms> [K]')
-    ax1 = plt.subplot(gs[1], sharex = ax0)
+    ax1.set_ylim(-0.25,0.25)
 
-    deltaT_smooth = []
+
+    ax0.plot(df['time_stamp'], deltaT, color='lightgrey', label='original')
     for plot_color, filter_size in zip(plot_colors, filter_sizes):
         deltaT_smooth = np.convolve(deltaT, np.ones(filter_size) / filter_size, mode='same')
-        dT, = ax0.plot(df['time_stamp'], deltaT_smooth, color=plot_color )
+        dT, = ax0.plot(df['time_stamp'], deltaT_smooth, color=plot_color, label=str('smooth{0:3d}'.format(filter_size)))
         res = deltaT - deltaT_smooth
         resT, = ax1.plot(df['time_stamp'], res, color=plot_color)
+        ax0.legend(loc='upper right')
+        # ax0.legend(loc='upper right', color=['lightgrey, red, blue'], labels=['original', 'smooth 500ms', 'smooth 50ms'])
 
     plt.subplots_adjust(hspace=.0)
+
+    for image_range in image_ranges:
+        ax0.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
+        savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(name, image_range[0], image_range[1]))
+        plt.savefig(savefilename)
+
     plt.show()
 
 
