@@ -110,4 +110,4 @@ venv.bak/
 # Generated files
 icaps/icaps_timeline.txt
 icaps/icaps_timeline.xlsx
-
+icaps/*.png
