@@ -268,10 +268,33 @@ integration_ranges = image_ranges_2_timestamps(image_ranges)
 integrate(df, integration_ranges)
 
 # plot_names = ['vx_res_CMS', 'vy_res_CMS', 'vz_res_CMS']
-# plots = dict()
-# plotsx = dict()
-# plotsx['plots'] = ('res_dT_x','res_dT_x_smooth', 'gradT_x','vx_res_CMS','posx')
-# plotsx['title'] =
+plotinfos = dict()
+
+plotsx = dict()
+plotsx['plots'] = [('res_dT_x','res_dT_x_smooth'), 'gradT_x','vx_res_CMS','posx']
+plotsx['colours'] = [('lightblue', 'red'), 'lightblue', 'lightblue', 'lightblue']
+plotsx['yranges'] = [(-0.25,0.25), (-5,5), (-0.00025,0.00025), (-0.0001, 0.0001)]
+plotsx['title'] = 'x-axis'
+plotsx['desc']  = ['residual T [K]', '', 'grad T [K/m]', 'v_therm [m/s]', 'position [m]']
+
+plotsy = dict()
+plotsy['plots'] = [('res_dT_y','res_dT_y_smooth'), 'gradT_y','vy_res_CMS','posy']
+plotsy['colours'] = [('lightblue', 'red'), 'lightblue', 'lightblue', 'lightblue']
+plotsy['yranges'] = [(-0.25,0.25), (-5,5), (-0.00025,0.00025), (-0.0001, 0.0001)]
+plotsy['title'] = 'y-axis'
+plotsy['desc']  = ['residual T [K]', '', 'grad T [K/m]', 'v_therm [m/s]', 'position [m]']
+
+plotsz = dict()
+plotsz['plots'] = [('res_dT_z','res_dT_z_smooth'), 'gradT_z','vz_res_CMS','posz']
+plotsz['colours'] = [('lightblue', 'red'), 'lightblue', 'lightblue', 'lightblue']
+plotsz['yranges'] = [(-0.25,0.25), (-5,5), (-0.00025,0.00025), (-0.0001, 0.0001)]
+plotsz['title'] = 'z-axis'
+plotsz['desc']  = ['residual T [K]', '', 'grad T [K/m]', 'v_therm [m/s]', 'position [m]']
+
+plotinfos['x'] = plotsx
+plotinfos['y'] = plotsy
+plotinfos['z'] = plotsy
+
 plot_names = [\
               ('res_dT_x','res_dT_x_smooth', 'gradT_x','vx_res_CMS','posx'), \
               ('res_dT_y','res_dT_y_smooth', 'gradT_y','vy_res_CMS','posy'), \
