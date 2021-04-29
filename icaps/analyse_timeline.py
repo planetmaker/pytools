@@ -153,6 +153,58 @@ def oosimg_to_timestamp(vec_n):
             rval[i] = vec_n[i] * deltat_per_oos_img + t_first_oos
     return rval
 
+def image_ranges_2_timestamps(image_ranges):
+    start_timestamps = list()
+    for image_range in image_ranges:
+        start_timestamps.append((ldmimg_to_timestep(image_range[0]), ldmimg_to_timestep(image_range[1])))
+
+    return start_timestamps
+
+def timestamps_2_datapoints(timestamps):
+    datapoints = list()
+    for timestamp in timestamps:
+        datapoint = min(df['time_stamp'] > timestamp)
+        datapoints.append(datapoint)
+
+    return datapoints
+
+def integrate(df, integration_ranges):
+    df['posx'] = np.nan
+    df['posy'] = np.nan
+    df['posz'] = np.nan
+    dx = 0
+    dy = 0
+    dz = 0
+    n_ranges = len(integration_ranges)
+    current_range = 1 # first ignored as full range
+
+    this_range = integration_ranges[current_range]
+    start = this_range[0]
+    end = this_range[1]
+    for index, row in df.iterrows():
+        if (row['time_stamp'] > end):
+            dx = 0
+            dy = 0
+            dz = 0
+            current_range += 1
+            if current_range >= n_ranges:
+                return
+            this_range = integration_ranges[current_range]
+            start = this_range[0]
+            end = this_range[1]
+        else:
+            if (row['time_stamp'] < start):
+                pass
+            else:
+                dx += row['dx']
+                dy += row['dy']
+                dz += row['dz']
+                (df['posx'])[index] = dx
+                (df['posy'])[index] = dy
+                (df['posz'])[index] = dz
+
+    return
+
 
 # peltier element pairs:
 # OOS2 / XZ:
@@ -162,22 +214,131 @@ def oosimg_to_timestamp(vec_n):
 #   pair_z  = (10,1) --> z
 # --> column numbers for pairs:
 
-deltaT_x1 = df['TC4'] - df['TC2']
-deltaT_x2 = df['TC5'] - df['TC3']
-deltaT_y1 = df['TC8'] - df['TC6']
-deltaT_y2 = df['TC9'] - df['TC7']
-deltaT_z  = df['TC1'] - df['TC10']
+df['deltaT_x1'] = df['TC4'] - df['TC2']
+df['deltaT_x2'] = df['TC5'] - df['TC3']
+df['deltaT_y1'] = df['TC8'] - df['TC6']
+df['deltaT_y2'] = df['TC9'] - df['TC7']
+df['deltaT_z']  = df['TC1'] - df['TC10']
+df['deltaT_x'] = (df['deltaT_x1'] + df['deltaT_x2'] ) / 2
+df['deltaT_y'] = (df['deltaT_y1'] + df['deltaT_y2'] ) / 2
 
-deltaTs = [deltaT_x1, deltaT_x2, deltaT_y1, deltaT_y2, deltaT_z]
+# Calculate the averaged time over 500 data points (=500 milliseconds)
+trend_filter_length = 125 * 4 # Datapoints to average over. Timesteps are in 4ms increments (thus * 4 is in milliseconds)
+coupling_time = 6
+coupling_smooth = int(np.ceil(coupling_time / 4))
+# distances according to CDR document "IPESR-RP-00032-QS_B0_ICAPS Sounding Rocket Experiment design description.pdf" p36
+d_xy = 0.047 # inner diameter of large rings
+d_z  = 0.047 # height difference between small rings
+
+df['dT_x_smooth500'] = np.convolve(df['deltaT_x'], np.ones(trend_filter_length) / trend_filter_length, mode='same')
+df['dT_y_smooth500'] = np.convolve(df['deltaT_y'], np.ones(trend_filter_length) / trend_filter_length, mode='same')
+df['dT_z_smooth500'] = np.convolve(df['deltaT_z'], np.ones(trend_filter_length) / trend_filter_length, mode='same')
+
+# Residuals between the actual temperature and the trend over 500 milliseconds
+df['res_dT_x'] = df['deltaT_x'] - df['dT_x_smooth500']
+df['res_dT_y'] = df['deltaT_y'] - df['dT_y_smooth500']
+df['res_dT_z'] = df['deltaT_z'] - df['dT_z_smooth500']
+
+# smooth data by the coupling time so that we don't introduce spurious accelerations
+df['res_dT_x_smooth'] = np.convolve(df['res_dT_x'], np.ones(coupling_smooth) / coupling_smooth, mode='same')
+df['res_dT_y_smooth'] = np.convolve(df['res_dT_y'], np.ones(coupling_smooth) / coupling_smooth, mode='same')
+df['res_dT_z_smooth'] = np.convolve(df['res_dT_z'], np.ones(coupling_smooth) / coupling_smooth, mode='same')
+
+df['gradT_x'] = df['res_dT_x_smooth'] / d_xy
+df['gradT_y'] = df['res_dT_y_smooth'] / d_xy
+df['gradT_z'] = df['res_dT_z_smooth'] / d_z
+
+# velocity introduced by residualt temperature variations:
+v_CMS = 55e-6 # m/s/ (K/m)
+df['vx_res_CMS'] = df['gradT_x'] * v_CMS
+df['vy_res_CMS'] = df['gradT_y'] * v_CMS
+df['vz_res_CMS'] = df['gradT_z'] * v_CMS
+
+# Calculate the time differences between data rows in seconds
+df['dt'] = df['time_stamp'].diff() / 1000
+
+# Calculate the movement distance between timesteps
+df['dx'] = df['vx_res_CMS'] * df['dt']
+df['dy'] = df['vy_res_CMS'] * df['dt']
+df['dz'] = df['vz_res_CMS'] * df['dt']
+
+image_ranges = [(0,370000), (31107,43907), (51507,65307), (72507,86407), (93907,107407)]
+integration_ranges = image_ranges_2_timestamps(image_ranges)
+
+integrate(df, integration_ranges)
+
+# plot_names = ['vx_res_CMS', 'vy_res_CMS', 'vz_res_CMS']
+# plots = dict()
+# plotsx = dict()
+# plotsx['plots'] = ('res_dT_x','res_dT_x_smooth', 'gradT_x','vx_res_CMS','posx')
+# plotsx['title'] =
+plot_names = [\
+              ('res_dT_x','res_dT_x_smooth', 'gradT_x','vx_res_CMS','posx'), \
+              ('res_dT_y','res_dT_y_smooth', 'gradT_y','vy_res_CMS','posy'), \
+              ('res_dT_z','res_dT_z_smooth', 'gradT_z','vz_res_CMS','posz') \
+                  ]
+
+
+from matplotlib import gridspec
+cm = 1/2.54
+
+for name in plot_names:
+
+    fig = plt.figure(figsize=(30*cm, 20*cm))
+    plt.title(name)
+    gs = gridspec.GridSpec(4, 1, height_ratios=[2,2,2,2])
+
+    ax0 = plt.subplot(gs[0])
+    ax0.set_title(name)
+    ax0.set_xlabel('time [ms]')
+    ax0.set_ylabel(name[0])
+    ax0.plot(df['time_stamp'], df[name[0]])
+    ax0.plot(df['time_stamp'], df[name[1]],color='red')
+    ax0.set_ylim(-0.25,0.25)
+
+    ax1 = plt.subplot(gs[1], sharex = ax0)
+    ax1.set_ylabel(name[2])
+    #ax1.set_ylim(-0.25,0.25)
+    ax1.plot(df['time_stamp'], df[name[2]])
+    ax1.set_ylim(-5,5)
+
+    ax2 = plt.subplot(gs[2], sharex = ax0)
+    ax2.set_ylabel(name[3])
+    #ax2.set_ylim(-0.25,0.25)
+    ax2.plot(df['time_stamp'], df[name[3]])
+    ax2.set_ylim(-0.00025,0.00025)
+
+    ax3 = plt.subplot(gs[3], sharex = ax0)
+    ax3.set_ylabel(name[4])
+    #ax3.set_ylim(-0.25,0.25)
+    ax3.plot(df['time_stamp'], df[name[4]])
+    ax3.set_ylim(-0.0001,0.0001)
+
+    plt.subplots_adjust(hspace=.0)
+    plt.show()
+
+
+    for image_range in image_ranges:
+        ax0.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
+        savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(name[4], image_range[0], image_range[1]))
+        plt.savefig(savefilename)
+
+    plt.show()
+
+
+
+# ====================================================================
+# Plotting temperature differences and residuals wrt means
+
+deltaTs = [df['deltaT_x1'], df['deltaT_x2'], df['deltaT_y1'], df['deltaT_y2'], df['deltaT_z']]
 plot_names = ['x1', 'x2', 'y1', 'y2', 'z']
 
-filter_sizes = [50,500]
-filter_size= 50
+filter_sizes = np.ceil([12.5,125] * 4).astype(int)
+filter_size= np.ceil(12.5*4)
 plot_colors = ['blue', 'red']
 
 from matplotlib import gridspec
 
-image_ranges = [(0,370000), (31107,43907), (51507,65307), (72507,86407), (93907,107407)]
 
 cm = 1/2.54
 
@@ -216,7 +377,8 @@ for name, deltaT in zip(plot_names, deltaTs):
 
     plt.show()
 
-
+# ====================================================================
+# Create the
 
 # dT_50,  = ax0.plot(df['time_stamp'], deltaT_x1_smooth_50,  color='blue')
 # dT_500, = ax0.plot(df['time_stamp'], deltaT_x1_smooth_500, color='red')
