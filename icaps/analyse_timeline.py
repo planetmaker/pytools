@@ -262,10 +262,16 @@ df['dx'] = df['vx_res_CMS'] * df['dt']
 df['dy'] = df['vy_res_CMS'] * df['dt']
 df['dz'] = df['vz_res_CMS'] * df['dt']
 
+df['ldm_image'] = timestep_to_ldmimg(df['time_stamp'])
+
 image_ranges = [(0,370000), (31107,43907), (51507,65307), (72507,86407), (93907,107407)]
 integration_ranges = image_ranges_2_timestamps(image_ranges)
 
 integrate(df, integration_ranges)
+
+if True:
+    df.to_csv('~/PowerFolders/ICAPS_data_analysis/Housekeeping/icaps_virtual_motion.csv')
+
 
 # plot_names = ['vx_res_CMS', 'vy_res_CMS', 'vz_res_CMS']
 plotinfos = dict()
@@ -305,45 +311,36 @@ plot_names = [\
 from matplotlib import gridspec
 cm = 1/2.54
 
-for name in plot_names:
+for plotname,plotinfo in plotinfos.items():
+    print(plotinfo)
 
     fig = plt.figure(figsize=(30*cm, 20*cm))
-    plt.title(name)
-    gs = gridspec.GridSpec(4, 1, height_ratios=[2,2,2,2])
+    plt.title(plotinfo['title'])
+    n = len(plotinfo['plots'])
+    gs = gridspec.GridSpec(n, 1, height_ratios=([2]*n))
 
-    ax0 = plt.subplot(gs[0])
-    ax0.set_title(name)
-    ax0.set_xlabel('time [ms]')
-    ax0.set_ylabel(name[0])
-    ax0.plot(df['time_stamp'], df[name[0]])
-    ax0.plot(df['time_stamp'], df[name[1]],color='red')
-    ax0.set_ylim(-0.25,0.25)
-
-    ax1 = plt.subplot(gs[1], sharex = ax0)
-    ax1.set_ylabel(name[2])
-    #ax1.set_ylim(-0.25,0.25)
-    ax1.plot(df['time_stamp'], df[name[2]])
-    ax1.set_ylim(-5,5)
-
-    ax2 = plt.subplot(gs[2], sharex = ax0)
-    ax2.set_ylabel(name[3])
-    #ax2.set_ylim(-0.25,0.25)
-    ax2.plot(df['time_stamp'], df[name[3]])
-    ax2.set_ylim(-0.00025,0.00025)
-
-    ax3 = plt.subplot(gs[3], sharex = ax0)
-    ax3.set_ylabel(name[4])
-    #ax3.set_ylim(-0.25,0.25)
-    ax3.plot(df['time_stamp'], df[name[4]])
-    ax3.set_ylim(-0.0001,0.0001)
+    ax = plt.subplot(gs[0])
+    ax.set_title(plotinfo['title'])
+    for i,subplot in enumerate(plotinfo['plots']):
+        ax = plt.subplot(gs[i])
+        ax.set_label('time [ms]')
+        ax.set_ylabel(plotinfo['desc'][i])
+        if isinstance(subplot, str):
+            ax.plot(df['time_stamp'], df[subplot], color=plotinfo['colours'][i])
+        else:
+            n_lines = len(subplot)
+            for l in range(0, n_lines-1):
+                ax.plot(df['time_stamp'], df[subplot[l]], color=plotinfo['colours'][i][l])
+        ax.set_ylim(plotinfo['yranges'][i][0], plotinfo['yranges'][i][1])
 
     plt.subplots_adjust(hspace=.0)
     plt.show()
 
 
+    ax = plt.subplot(gs[0])
     for image_range in image_ranges:
-        ax0.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
-        savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(name[4], image_range[0], image_range[1]))
+        ax.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
+        savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(plotinfo['title'], image_range[0], image_range[1]))
         plt.savefig(savefilename)
 
     plt.show()
@@ -372,7 +369,7 @@ for name, deltaT in zip(plot_names, deltaTs):
     gs = gridspec.GridSpec(2, 1, height_ratios=[2,1])
     ax0 = plt.subplot(gs[0])
     ax0.set_title(name)
-    ax0.set_xlabel('time [ms]')
+    ax0.set_label('time [ms]')
     ax0.set_ylabel('temperature difference [K]')
     ax0.set_ylim(-2,2)
     secx = ax0.secondary_xaxis('top', functions=(timestep_to_ldmimg, ldmimg_to_timestep))
