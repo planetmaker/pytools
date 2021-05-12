@@ -97,7 +97,7 @@ def oosimg_to_timestep(X):
 
 t_LDM_start  = 2263444
 t_LDM_end    = 2635588
-n_LDM_images = 372348
+n_LDM_images = 367000
 
 def ldmimg_to_timestep(X):
     global t_LDM_start
@@ -205,6 +205,11 @@ def integrate(df, integration_ranges):
 
     return
 
+def cumulative(df, column, integration_ranges):
+    for intrange in integration_ranges:
+        values = df[column]
+
+
 
 # peltier element pairs:
 # OOS2 / XZ:
@@ -297,9 +302,17 @@ plotsz['yranges'] = [(-0.25,0.25), (-5,5), (-0.00025,0.00025), (-0.0001, 0.0001)
 plotsz['title'] = 'z-axis'
 plotsz['desc']  = ['residual T [K]', '', 'grad T [K/m]', 'v_therm [m/s]', 'position [m]']
 
-plotinfos['x'] = plotsx
-plotinfos['y'] = plotsy
-plotinfos['z'] = plotsy
+plotI = dict()
+plotI['plots'] = ['Icm1', 'PeltSet1', 'TC1', 'TC2']
+plotI['colours'] = ['lightblue', 'lightblue', 'lightblue', 'lightblue']
+plotI['yranges'] = [(-0.03,0.0), (2,3), (27,29), (27,29)]
+plotI['title'] = 'Currents'
+plotI['desc']  = ['Icm1', 'PeltSet1', 'TC1', 'TC2']
+
+# plotinfos['x'] = plotsx
+# plotinfos['y'] = plotsy
+# plotinfos['z'] = plotsz
+plotinfos['I'] = plotI
 
 plot_names = [\
               ('res_dT_x','res_dT_x_smooth', 'gradT_x','vx_res_CMS','posx'), \
@@ -319,11 +332,15 @@ for plotname,plotinfo in plotinfos.items():
     n = len(plotinfo['plots'])
     gs = gridspec.GridSpec(n, 1, height_ratios=([2]*n))
 
-    ax = plt.subplot(gs[0])
-    ax.set_title(plotinfo['title'])
+    primary_ax = plt.subplot(gs[0])
+    primary_ax.set_title(plotinfo['title'])
     for i,subplot in enumerate(plotinfo['plots']):
-        ax = plt.subplot(gs[i])
-        ax.set_label('time [ms]')
+        if (i == 0):
+            ax = plt.subplot(gs[i])
+            primary_ax = ax
+            ax.set_label('time [ms]')
+        else:
+            ax = plt.subplot(gs[i], sharex = primary_ax)
         ax.set_ylabel(plotinfo['desc'][i])
         if isinstance(subplot, str):
             ax.plot(df['time_stamp'], df[subplot], color=plotinfo['colours'][i])
@@ -347,55 +364,55 @@ for plotname,plotinfo in plotinfos.items():
 
 
 
-# ====================================================================
-# Plotting temperature differences and residuals wrt means
+# # ====================================================================
+# # Plotting temperature differences and residuals wrt means
 
-deltaTs = [df['deltaT_x1'], df['deltaT_x2'], df['deltaT_y1'], df['deltaT_y2'], df['deltaT_z']]
-plot_names = ['x1', 'x2', 'y1', 'y2', 'z']
+# deltaTs = [df['deltaT_x1'], df['deltaT_x2'], df['deltaT_y1'], df['deltaT_y2'], df['deltaT_z']]
+# plot_names = ['x1', 'x2', 'y1', 'y2', 'z']
 
-filter_sizes = np.ceil([12.5,125] * 4).astype(int)
-filter_size= np.ceil(12.5*4)
-plot_colors = ['blue', 'red']
+# filter_sizes = np.ceil([12.5,125] * 4).astype(int)
+# filter_size= np.ceil(12.5*4)
+# plot_colors = ['blue', 'red']
 
-from matplotlib import gridspec
-
-
-cm = 1/2.54
-
-for name, deltaT in zip(plot_names, deltaTs):
-
-    fig = plt.figure(figsize=(30*cm, 20*cm))
-    plt.title(str(deltaT))
-    gs = gridspec.GridSpec(2, 1, height_ratios=[2,1])
-    ax0 = plt.subplot(gs[0])
-    ax0.set_title(name)
-    ax0.set_label('time [ms]')
-    ax0.set_ylabel('temperature difference [K]')
-    ax0.set_ylim(-2,2)
-    secx = ax0.secondary_xaxis('top', functions=(timestep_to_ldmimg, ldmimg_to_timestep))
-    secx.set_xlabel('LDM image #')
-    ax1 = plt.subplot(gs[1], sharex = ax0)
-    ax1.set_ylabel('residual temperature T- <T_500ms> [K]')
-    ax1.set_ylim(-0.25,0.25)
+# from matplotlib import gridspec
 
 
-    ax0.plot(df['time_stamp'], deltaT, color='lightgrey', label='original')
-    for plot_color, filter_size in zip(plot_colors, filter_sizes):
-        deltaT_smooth = np.convolve(deltaT, np.ones(filter_size) / filter_size, mode='same')
-        dT, = ax0.plot(df['time_stamp'], deltaT_smooth, color=plot_color, label=str('smooth{0:3d}'.format(filter_size)))
-        res = deltaT - deltaT_smooth
-        resT, = ax1.plot(df['time_stamp'], res, color=plot_color)
-        ax0.legend(loc='upper right')
-        # ax0.legend(loc='upper right', color=['lightgrey, red, blue'], labels=['original', 'smooth 500ms', 'smooth 50ms'])
+# cm = 1/2.54
 
-    plt.subplots_adjust(hspace=.0)
+# for name, deltaT in zip(plot_names, deltaTs):
 
-    for image_range in image_ranges:
-        ax0.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
-        savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(name, image_range[0], image_range[1]))
-        plt.savefig(savefilename)
+#     fig = plt.figure(figsize=(30*cm, 20*cm))
+#     plt.title(str(deltaT))
+#     gs = gridspec.GridSpec(2, 1, height_ratios=[2,1])
+#     ax0 = plt.subplot(gs[0])
+#     ax0.set_title(name)
+#     ax0.set_label('time [ms]')
+#     ax0.set_ylabel('temperature difference [K]')
+#     ax0.set_ylim(-2,2)
+#     secx = ax0.secondary_xaxis('top', functions=(timestep_to_ldmimg, ldmimg_to_timestep))
+#     secx.set_xlabel('LDM image #')
+#     ax1 = plt.subplot(gs[1], sharex = ax0)
+#     ax1.set_ylabel('residual temperature T- <T_500ms> [K]')
+#     ax1.set_ylim(-0.25,0.25)
 
-    plt.show()
+
+#     ax0.plot(df['time_stamp'], deltaT, color='lightgrey', label='original')
+#     for plot_color, filter_size in zip(plot_colors, filter_sizes):
+#         deltaT_smooth = np.convolve(deltaT, np.ones(filter_size) / filter_size, mode='same')
+#         dT, = ax0.plot(df['time_stamp'], deltaT_smooth, color=plot_color, label=str('smooth{0:3d}'.format(filter_size)))
+#         res = deltaT - deltaT_smooth
+#         resT, = ax1.plot(df['time_stamp'], res, color=plot_color)
+#         ax0.legend(loc='upper right')
+#         # ax0.legend(loc='upper right', color=['lightgrey, red, blue'], labels=['original', 'smooth 500ms', 'smooth 50ms'])
+
+#     plt.subplots_adjust(hspace=.0)
+
+#     for image_range in image_ranges:
+#         ax0.set_xlim(ldmimg_to_timestep(image_range[0]),ldmimg_to_timestep(image_range[1]))
+#         savefilename = str('{0}_{1:06d}-{2:06d}.png'.format(name, image_range[0], image_range[1]))
+#         plt.savefig(savefilename)
+
+#     plt.show()
 
 # ====================================================================
 # Create the
