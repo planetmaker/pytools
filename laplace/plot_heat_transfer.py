@@ -34,7 +34,7 @@ def read_measurement_csv(filename, column_names = None):
     num_channels = (df.shape[1] - 1) // 2
     df2 = pd.DataFrame()
     for i in range(num_channels):
-        name = str('ch{}').format(i+1)
+        name = column_names[i] if column_names is not None else str('ch{}').format(i+1)
         df2[name] = df.iloc[:,2*i+1] + df.iloc[:,2*i+2] / 100
    
     return df2
@@ -99,6 +99,7 @@ def plot_with_difference(df, name_diff, yrange=None, diff_yrange=None, title=Non
     ax1.plot(t, df[name_diff[0]] - df[name_diff[1]], label=str('Difference {} to {}').format(name_diff[0],name_diff[1]))
     ax1.set_xlabel('time [min]')
     ax1.set_ylabel('temp. diff [°c]')
+    ax1.grid(True, linestyle='-.')
     ax1.legend()
     
     if title is not None:
@@ -120,8 +121,8 @@ measurements = dict()
 # measurements['500µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230719.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
 # measurements['with chamber'] = {'filename': 'mikroskop_20230927a1.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
 
-measurements['Cam Microscope cooled'] = Measurement(filename='mikroskop_20231019a1.csv')
-measurements['LED'] = Measurement(filename='mikroskop_20231020a5.csv', diff=('ch1', 'ch4'))
+# measurements['Cam Microscope cooled'] = Measurement(filename='mikroskop_20231019a1.csv')
+measurements['LED'] = Measurement(filename='mikroskop_20231020a5.csv', diff=('Light', 'Microscope'), names=['Microscope tube','Light','Microscope','Cam'])
 
 #for k,v in measurements.items():
 #    plot_columns(k,v)
@@ -148,8 +149,8 @@ for name,measurement in measurements.items():
     filename = Path.home().joinpath(raw_path).joinpath(measurement['filename'])
     ref = measurement['ref']
     diff = measurement['diff']
-    print(filename)
-    df = read_measurement_csv(filename)
+    print("Processing: {}".format(measurement['filename']))
+    df = read_measurement_csv(filename,column_names=measurement['names'])
     dfstart = to_ref(df, ref_channel_name = ref)
     plot_with_difference(dfstart, diff, title=name)
     
