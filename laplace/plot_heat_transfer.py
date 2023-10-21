@@ -67,8 +67,8 @@ def to_ref(df, ref_channel_name=None):
         
     return df2
 
-def plot_with_difference(df, name_diff1, name_diff2, yrange=None, title=None, **kwargs):
-    fig, (ax0,ax1) = plt.subplots(2, 1, sharex = True, figsize=(10.24,10.24))
+def plot_with_difference(df, name_diff1, name_diff2, yrange=None, diff_yrange=None, title=None, **kwargs):
+    fig, (ax0,ax1) = plt.subplots(2, 1, sharex = True, figsize=(10.24,10.24), gridspec_kw=dict(height_ratios=[3,1]))
     # Remove vertical space between axes
     fig.subplots_adjust(hspace=0)
     num_rows = df.shape[0]
@@ -97,6 +97,8 @@ def plot_with_difference(df, name_diff1, name_diff2, yrange=None, title=None, **
         ax0.set_title(title)
     if yrange is not None:
         ax0.yrange = yrange
+    if diff_yrange is not None:
+        ax1.yrange= diff_yrange
     
     plt.show()
     
