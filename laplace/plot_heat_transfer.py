@@ -16,6 +16,14 @@ from matplotlib.lines import Line2D
 
 raw_path = 'Nextcloud/TUBS/LAPLACE-CAD/subsystems_documentation/LDM_LongDistanceMicroscope/heat_transfer_measurements/raw_data/'
 
+class Measurement(dict):
+    # extended dictionary class for the description of the measurement (files). 
+    # For simplicity some defaults are defined here
+    def __missing__(self, key):
+        if key == 'diff':
+            return ('ch2','ch3')
+        return None
+
 def read_measurement_csv(filename, column_names = None):
     try:
         df = pd.read_csv(filename, sep = ',', encoding='latin1', skiprows=2)
@@ -67,7 +75,7 @@ def to_ref(df, ref_channel_name=None):
         
     return df2
 
-def plot_with_difference(df, name_diff1, name_diff2, yrange=None, diff_yrange=None, title=None, **kwargs):
+def plot_with_difference(df, name_diff, yrange=None, diff_yrange=None, title=None, **kwargs):
     fig, (ax0,ax1) = plt.subplots(2, 1, sharex = True, figsize=(10.24,10.24), gridspec_kw=dict(height_ratios=[3,1]))
     # Remove vertical space between axes
     fig.subplots_adjust(hspace=0)
@@ -88,7 +96,7 @@ def plot_with_difference(df, name_diff1, name_diff2, yrange=None, diff_yrange=No
     ax0.grid(True, linestyle='-.')
     ax0.set_ylabel('temperature [°C]')
     
-    ax1.plot(t, df[name_diff1] - df[name_diff2], label=str('Difference {} to {}').format(name_diff1,name_diff2))
+    ax1.plot(t, df[name_diff[0]] - df[name_diff[1]], label=str('Difference {} to {}').format(name_diff[0],name_diff[1]))
     ax1.set_xlabel('time [min]')
     ax1.set_ylabel('temp. diff [°c]')
     ax1.legend()
@@ -105,20 +113,23 @@ def plot_with_difference(df, name_diff1, name_diff2, yrange=None, diff_yrange=No
     
     
 measurements = dict()
-measurements['unmodified'] = {'filename': 'mikroskop_20230628.txt', 'sep':'\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750/6}
-measurements['250µm teflon at microscope, no fan, deflector'] =  {'filename': 'mikroskop_20230702.txt', 'sep': ',', 'decimal':'.', 'deltaylim':[-0.5,1.5], 'tref':750/6}
-measurements['250µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230712.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-measurements['250µm teflon at cam, fan + deflector'] = {'filename': 'mikroskop_20230714.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-measurements['500µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230719.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-measurements['with chamber'] = {'filename': 'mikroskop_20230927a1.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
+# measurements['unmodified'] = {'filename': 'mikroskop_20230628.txt', 'sep':'\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750/6}
+# measurements['250µm teflon at microscope, no fan, deflector'] =  {'filename': 'mikroskop_20230702.txt', 'sep': ',', 'decimal':'.', 'deltaylim':[-0.5,1.5], 'tref':750/6}
+# measurements['250µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230712.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
+# measurements['250µm teflon at cam, fan + deflector'] = {'filename': 'mikroskop_20230714.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
+# measurements['500µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230719.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
+# measurements['with chamber'] = {'filename': 'mikroskop_20230927a1.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
+
+measurements['Cam Microscope cooled'] = Measurement(filename='mikroskop_20231019a1.csv')
+measurements['LED'] = Measurement(filename='mikroskop_20231020a5.csv', diff=('ch1', 'ch4'))
 
 #for k,v in measurements.items():
 #    plot_columns(k,v)
 # plot_columns('with chamber', measurements['with chamber'])
 
 
-datafilename = 'mikroskop_20231020a5.csv'
-filename = Path.home().joinpath(raw_path).joinpath(datafilename)
+# datafilename = 'mikroskop_20231020a5.csv'
+# filename = Path.home().joinpath(raw_path).joinpath(datafilename)
 
 # df = pd.read_csv(filename, sep=',', encoding='latin1', skiprows=2)
 
@@ -127,20 +138,18 @@ filename = Path.home().joinpath(raw_path).joinpath(datafilename)
 #     name = str('ch{}').format(i+1)
 #     df[name] = df.iloc[:,2*i+1] + df.iloc[:,2*i+2] / 100
 
-df = read_measurement_csv(filename)
-df.plot(title=datafilename,xlabel='time [s]',ylabel='temperature [°C]')
+# df = read_measurement_csv(filename)
+# df.plot(title=datafilename,xlabel='time [s]',ylabel='temperature [°C]')
 
-dfstart = to_ref(df, ref_channel_name=None)
-plot_with_difference(dfstart, 'ch1', 'ch4', title=datafilename)
+# dfstart = to_ref(df, ref_channel_name=None)
+# plot_with_difference(dfstart, 'ch1', 'ch4', title=datafilename)
 
-import math
-x = [math.cos(i/10) for i in range(100)]
-y = [math.sin(i/10) for i in range(100)]
-
-# dff = pd.DataFrame()
-# dff['x'] = x
-# dff['y'] = y
-# plot_difference(dff,'x','y')
-# dff.plot()
-
-
+for name,measurement in measurements.items():
+    filename = Path.home().joinpath(raw_path).joinpath(measurement['filename'])
+    ref = measurement['ref']
+    diff = measurement['diff']
+    print(filename)
+    df = read_measurement_csv(filename)
+    dfstart = to_ref(df, ref_channel_name = ref)
+    plot_with_difference(dfstart, diff, title=name)
+    
