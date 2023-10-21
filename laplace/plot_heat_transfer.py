@@ -54,10 +54,10 @@ def plot_columns(title,filedata):
     
     df.plot(x="time", y=["deltaT Chamber Microscope"], title=title, style='-', ylabel="temperature rise [°C]", xlabel="time [s]", ylim=filedata['deltaylim'])
     
-def to_same_start(df, channel_name=None):
-    if channel_name is None:
-        channel_name = df.columns[0]
-    ref_temperature = df[channel_name][0]
+def to_ref(df, ref_channel_name=None):
+    if ref_channel_name is None:
+        ref_channel_name = df.columns[0]
+    ref_temperature = df[ref_channel_name][0]
 
     df2 = pd.DataFrame()
 
@@ -67,31 +67,39 @@ def to_same_start(df, channel_name=None):
         
     return df2
 
-def plot_difference(df, name_ch1, name_ch2, title=None, **kwargs):
-    fig, (ax0,ax1) = plt.subplots(2, 1, sharex = True)
+def plot_with_difference(df, name_diff1, name_diff2, yrange=None, title=None, **kwargs):
+    fig, (ax0,ax1) = plt.subplots(2, 1, sharex = True, figsize=(10.24,10.24))
     # Remove vertical space between axes
     fig.subplots_adjust(hspace=0)
     num_rows = df.shape[0]
     t = [t/60 for t in range(num_rows)]
     
     # Plot each graph, and manually set the y tick values
-    l1, = ax0.plot(t, df[name_ch1], label=name_ch1)
-    l2, = ax0.plot(t, df[name_ch2], label=name_ch2)
+    # l1, = ax0.plot(t, df[name_diff1], label=name_diff1)
+    # l2, = ax0.plot(t, df[name_diff2], label=name_diff2)
+    for column in df:
+        ax0.plot(t, df[column], label=column)
+    # ax0.plot(t, df[name_diff1], label=name_diff1)
+    # ax0.plot(t, df[name_diff2], label=name_diff2)
     # ax0.legend([l1,l2])
-    # ax0.legend([l1,l2],[name_ch1, name_ch2])
+    # ax0.legend([l1,l2],[name_diff1, name_diff2])
     # ax0.legend(handles=[l1,l2],loc='upper left',shadow=True)
     ax0.legend()
     ax0.grid(True, linestyle='-.')
     ax0.set_ylabel('temperature [°C]')
     
-    ax1.plot(t, df[name_ch1] - df[name_ch2])
+    ax1.plot(t, df[name_diff1] - df[name_diff2], label=str('Difference {} to {}').format(name_diff1,name_diff2))
     ax1.set_xlabel('time [min]')
     ax1.set_ylabel('temp. diff [°c]')
+    ax1.legend()
     
     if title is not None:
         ax0.set_title(title)
+    if yrange is not None:
+        ax0.yrange = yrange
     
     plt.show()
+    
     
     
 measurements = dict()
@@ -120,8 +128,8 @@ filename = Path.home().joinpath(raw_path).joinpath(datafilename)
 df = read_measurement_csv(filename)
 df.plot(title=datafilename,xlabel='time [s]',ylabel='temperature [°C]')
 
-dfstart = to_same_start(df, channel_name=None)
-plot_difference(dfstart, 'ch1', 'ch4', title=datafilename)
+dfstart = to_ref(df, ref_channel_name=None)
+plot_with_difference(dfstart, 'ch1', 'ch4', title=datafilename)
 
 import math
 x = [math.cos(i/10) for i in range(100)]
