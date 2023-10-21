@@ -10,9 +10,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 
-import matplotlib.collections as mcol
-from matplotlib.legend_handler import HandlerLineCollection, HandlerTuple
-from matplotlib.lines import Line2D
 
 raw_path = 'Nextcloud/TUBS/LAPLACE-CAD/subsystems_documentation/LDM_LongDistanceMicroscope/heat_transfer_measurements/raw_data/'
 
@@ -82,16 +79,9 @@ def plot_with_difference(df, name_diff, yrange=None, diff_yrange=None, title=Non
     num_rows = df.shape[0]
     t = [t/60 for t in range(num_rows)]
     
-    # Plot each graph, and manually set the y tick values
-    # l1, = ax0.plot(t, df[name_diff1], label=name_diff1)
-    # l2, = ax0.plot(t, df[name_diff2], label=name_diff2)
     for column in df:
         ax0.plot(t, df[column], label=column)
-    # ax0.plot(t, df[name_diff1], label=name_diff1)
-    # ax0.plot(t, df[name_diff2], label=name_diff2)
-    # ax0.legend([l1,l2])
-    # ax0.legend([l1,l2],[name_diff1, name_diff2])
-    # ax0.legend(handles=[l1,l2],loc='upper left',shadow=True)
+
     ax0.legend()
     ax0.grid(True, linestyle='-.')
     ax0.set_ylabel('temperature [°C]')
@@ -114,36 +104,14 @@ def plot_with_difference(df, name_diff, yrange=None, diff_yrange=None, title=Non
     
     
 measurements = dict()
-# measurements['unmodified'] = {'filename': 'mikroskop_20230628.txt', 'sep':'\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750/6}
-# measurements['250µm teflon at microscope, no fan, deflector'] =  {'filename': 'mikroskop_20230702.txt', 'sep': ',', 'decimal':'.', 'deltaylim':[-0.5,1.5], 'tref':750/6}
-# measurements['250µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230712.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-# measurements['250µm teflon at cam, fan + deflector'] = {'filename': 'mikroskop_20230714.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-# measurements['500µm teflon at cam, no fan, no deflector'] = {'filename': 'mikroskop_20230719.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
-# measurements['with chamber'] = {'filename': 'mikroskop_20230927a1.txt', 'sep': '\t', 'decimal':',', 'deltaylim':[-0.5,1.5], 'tref':750}
 
-# measurements['Cam Microscope cooled'] = Measurement(filename='mikroskop_20231019a1.csv')
 measurements['LED'] = Measurement(filename='mikroskop_20231020a5.csv', diff=('Light', 'Microscope'), names=['Microscope tube','Light','Microscope','Cam'])
+measurements['Microscope cooled'] = Measurement(filename='mikroskop_20231019a1.csv', diff=('Microscope','Light'), names=['Microscope tube','Light','Microscope','Cam'])
+measurements['Microscope cooled #2'] = Measurement(filename='mikroskop_20231017a3.csv', diff=('Microscope', 'Light'), names=['Microscope tube','Light','Microscope','Cam'])
+measurements['Microscope'] = Measurement(filename='mikroskop_20231016a2.csv', diff=('Microscope','Light tube'), names=['Cam','Light tube','Microscope','Microscope tube'])
 
-#for k,v in measurements.items():
-#    plot_columns(k,v)
-# plot_columns('with chamber', measurements['with chamber'])
-
-
-# datafilename = 'mikroskop_20231020a5.csv'
-# filename = Path.home().joinpath(raw_path).joinpath(datafilename)
-
-# df = pd.read_csv(filename, sep=',', encoding='latin1', skiprows=2)
-
-# num_channels = (df.shape[1] - 1) // 2
-# for i in range(num_channels):
-#     name = str('ch{}').format(i+1)
-#     df[name] = df.iloc[:,2*i+1] + df.iloc[:,2*i+2] / 100
-
-# df = read_measurement_csv(filename)
-# df.plot(title=datafilename,xlabel='time [s]',ylabel='temperature [°C]')
-
-# dfstart = to_ref(df, ref_channel_name=None)
-# plot_with_difference(dfstart, 'ch1', 'ch4', title=datafilename)
+# measurements['Teflon 750µm'] = Measurement(filename='mikroskop_20230920a2.csv', diff=('Microscope','Ref'), names=['Cam','Unused','Ref','Microscope tube','Microscope'])
+measurements['default'] = Measurement(filename='mikroskop_20230927a1.csv', diff=('Microscope','Light outside'), names=['Cam','Light outside','Microscope','Microscope tube'])
 
 for name,measurement in measurements.items():
     filename = Path.home().joinpath(raw_path).joinpath(measurement['filename'])
